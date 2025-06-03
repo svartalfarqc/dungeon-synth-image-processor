@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏰 Dungeon Synth Processor 🏰</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🏰 DUNGEON SYNTH PROCESSOR 🏰</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="fileInput">Upload Image:</label>
+                <input type="file" id="fileInput" accept="image/*">
+                <div id="uploadStatus" class="status-message"></div>
+            </div>
+            
+            <div class="preset-buttons">
+                <button onclick="applyPreset('highContrast')">High Contrast</button>
+                <button onclick="applyPreset('threshold')">Threshold</button>
+                <button onclick="applyPreset('atmospheric')">Atmospheric</button>
+                <button onclick="applyPreset('silhouette')">Silhouette</button>
+                <button onclick="applyPreset('manuscript')">Medieval Manuscript</button>
+                <button onclick="applyPreset('ghostly')">Ghostly</button>
+            </div>
+            
+            <div class="control-group">
+                <label for="contrast">Contrast: <span id="contrastValue">1.5</span></label>
+                <input type="range" id="contrast" min="0.5" max="3" step="0.1" value="1.5">
+            </div>
+            
+            <div class="control-group">
+                <label for="brightness">Brightness: <span id="brightnessValue">0</span></label>
+                <input type="range" id="brightness" min="-100" max="100" step="5" value="0">
+            </div>
+            
+            <div class="control-group">
+                <label for="threshold">Threshold: <span id="thresholdValue">128</span></label>
+                <input type="range" id="threshold" min="0" max="255" step="5" value="128">
+            </div>
+            
+            <div class="control-group">
+                <label for="noise">Grain/Noise: <span id="noiseValue">20</span></label>
+                <input type="range" id="noise" min="0" max="50" step="5" value="20">
+            </div>
+            
+            <div class="control-group">
+                <label for="blur">Atmospheric Blur: <span id="blurValue">0</span></label>
+                <input type="range" id="blur" min="0" max="5" step="0.5" value="0">
+            </div>
+            
+            <div class="action-buttons">
+                <button onclick="processAllPresets()" id="processAllBtn" disabled>Generate All Variations</button>
+                <button onclick="resetToOriginal()" id="resetBtn" disabled>Reset to Original</button>
+                <button onclick="processCustom()" id="processCustomBtn" disabled>Apply Custom Settings</button>
+            </div>
+        </div>
+        
+        <div class="image-grid">
+            <div class="image-container original-container">
+                <h3>Original Image</h3>
+                <div class="image-wrapper">
+                    <img id="originalImage" class="preview-image" style="display: none;">
+                    <div id="uploadPrompt" class="upload-prompt">
+                        <div class="upload-icon">📁</div>
+                        <p>Upload an image to begin processing</p>
+                        <p class="upload-hint">Supported formats: JPG, PNG, TIFF, BMP, WebP</p>
+                    </div>
+                </div>
+                <div class="image-info" id="imageInfo" style="display: none;"></div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Threshold</h3>
+                <div class="image-wrapper">
+                    <img id="thresholdImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">🔳</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('threshold')" disabled>Download</button>
+                <div class="effect-info">Clean threshold processing</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>High Contrast Threshold</h3>
+                <div class="image-wrapper">
+                    <img id="highContrastImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">⚙️</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('highContrast')" disabled>Download</button>
+                <div class="effect-info">Pure black & white with dramatic contrast</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Atmospheric</h3>
+                <div class="image-wrapper">
+                    <img id="atmosphericImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">🌫️</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('atmospheric')" disabled>Download</button>
+                <div class="effect-info">Subtle blur with enhanced contrast</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Silhouette</h3>
+                <div class="image-wrapper">
+                    <img id="silhouetteImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">👤</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('silhouette')" disabled>Download</button>
+                <div class="effect-info">Stark silhouettes against light background</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Medieval Manuscript</h3>
+                <div class="image-wrapper">
+                    <img id="manuscriptImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">📜</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('manuscript')" disabled>Download</button>
+                <div class="effect-info">Aged parchment effect with heavy grain</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Ghostly Apparition</h3>
+                <div class="image-wrapper">
+                    <img id="ghostlyImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">👻</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('ghostly')" disabled>Download</button>
+                <div class="effect-info">Ethereal blur with bright midtones</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Custom Processing</h3>
+                <div class="image-wrapper">
+                    <img id="customImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">🎛️</div>
+                        <p>Custom preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('custom')" disabled>Download</button>
+                <div class="effect-info">Live preview with current slider settings</div>
+            </div>
+        </div>
+        
+        <div id="processingStatus" class="processing-status" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing image...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
