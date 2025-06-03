@@ -167,7 +167,13 @@
         <div id="processingStatus" class="processing-status" style="display: none;">
             <div class="spinner"></div>
             <p>Processing image...</p>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
         </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="successMessage" class="success-message" style="display: none;"></div>
     </div>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

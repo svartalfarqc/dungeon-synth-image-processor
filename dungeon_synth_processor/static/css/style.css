@@ -457,3 +457,33 @@ img {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
 }
+
+/* Progress bar styles */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #444, #666);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+/* Custom download button states */
+.download-btn.ready {
+    background: #2a5a2a !important;
+    color: #90ee90 !important;
+}
+
+.download-btn.processing {
+    background: #5a5a2a !important;
+    color: #fff !important;
+    cursor: not-allowed !important;
+}

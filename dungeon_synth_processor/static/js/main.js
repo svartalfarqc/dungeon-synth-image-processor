@@ -3,6 +3,7 @@ class DungeonSynthApp {
     constructor() {
         this.currentFilename = null;
         this.isProcessing = false;
+        this.customProcessingReady = false;
         this.initializeEventListeners();
         this.updateSliderDisplays();
     }
@@ -13,16 +14,16 @@ class DungeonSynthApp {
             this.handleFileUpload(e);
         });
 
-        // Slider events - immediate processing like web app
+        // Slider events with debounced processing
         const sliders = ['contrast', 'brightness', 'threshold', 'noise', 'blur'];
         sliders.forEach(slider => {
             const element = document.getElementById(slider);
             element.addEventListener('input', () => {
                 this.updateSliderDisplay(slider);
-                // Immediate processing like original web app
-                if (this.currentFilename && !this.isProcessing) {
-                    this.processCustom();
-                }
+                // Mark custom as not ready and update status
+                this.customProcessingReady = false;
+                this.updateCustomDownloadStatus();
+                this.debounceCustomProcess();
             });
         });
 
@@ -33,6 +34,8 @@ class DungeonSynthApp {
     setupDragAndDrop() {
         const fileInput = document.getElementById('fileInput');
         const uploadPrompt = document.getElementById('uploadPrompt');
+        
+        if (!uploadPrompt) return;
         
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             uploadPrompt.addEventListener(eventName, this.preventDefaults, false);
@@ -73,11 +76,15 @@ class DungeonSynthApp {
     updateSliderDisplay(slider) {
         const element = document.getElementById(slider);
         const display = document.getElementById(slider + 'Value');
-        display.textContent = element.value;
+        if (element && display) {
+            display.textContent = element.value;
+        }
     }
 
     showStatus(message, type = 'info') {
         const statusElement = document.getElementById('uploadStatus');
+        if (!statusElement) return;
+        
         statusElement.textContent = message;
         statusElement.className = `status-message ${type}`;
         statusElement.style.display = 'block';
@@ -89,14 +96,51 @@ class DungeonSynthApp {
         }
     }
 
-    showProcessingStatus(show = true, message = 'Processing image...') {
+    showProcessingStatus(show = true, message = 'Processing image...', progress = 0) {
         const statusElement = document.getElementById('processingStatus');
+        if (!statusElement) return;
+        
         const messageElement = statusElement.querySelector('p');
+        const progressFill = statusElement.querySelector('.progress-fill');
+        
         if (messageElement) {
             messageElement.textContent = message;
         }
+        
+        if (progressFill) {
+            progressFill.style.width = `${progress}%`;
+        }
+        
         statusElement.style.display = show ? 'block' : 'none';
         this.isProcessing = show;
+    }
+
+    updateCustomDownloadStatus() {
+        const customDownloadBtn = document.querySelector('.image-container:last-child .download-btn');
+        if (customDownloadBtn) {
+            if (this.customProcessingReady) {
+                customDownloadBtn.textContent = 'Download Ready ✓';
+                customDownloadBtn.classList.add('ready');
+                customDownloadBtn.classList.remove('processing');
+                customDownloadBtn.disabled = false;
+            } else {
+                customDownloadBtn.textContent = 'Processing...';
+                customDownloadBtn.classList.add('processing');
+                customDownloadBtn.classList.remove('ready');
+                customDownloadBtn.disabled = true;
+            }
+        }
+    }
+
+    debounceCustomProcess() {
+        if (this.customProcessTimeout) {
+            clearTimeout(this.customProcessTimeout);
+        }
+        this.customProcessTimeout = setTimeout(() => {
+            if (this.currentFilename && !this.isProcessing) {
+                this.processCustom();
+            }
+        }, 500);
     }
 
     validateFile(file) {
@@ -122,7 +166,7 @@ class DungeonSynthApp {
             this.validateFile(file);
             
             this.showStatus('Uploading and processing image...', 'info');
-            this.showProcessingStatus(true, 'Uploading image...');
+            this.showProcessingStatus(true, 'Uploading image...', 10);
 
             const formData = new FormData();
             formData.append('file', file);
@@ -141,19 +185,17 @@ class DungeonSynthApp {
                 this.showStatus(`Image uploaded successfully (${result.width}x${result.height})`, 'success');
                 
                 // Auto-process all presets
-                this.showProcessingStatus(true, 'Generating all variations...');
+                this.showProcessingStatus(true, 'Generating all variations...', 20);
                 setTimeout(() => {
                     this.processAllPresets();
                 }, 500);
             } else {
                 this.showStatus(result.error || 'Upload failed', 'error');
+                this.showProcessingStatus(false);
             }
         } catch (error) {
             this.showStatus(error.message, 'error');
-        } finally {
-            if (!this.currentFilename) {
-                this.showProcessingStatus(false);
-            }
+            this.showProcessingStatus(false);
         }
     }
 
@@ -162,17 +204,19 @@ class DungeonSynthApp {
         const prompt = document.getElementById('uploadPrompt');
         const info = document.getElementById('imageInfo');
 
-        img.src = imageData.preview;
-        img.style.display = 'block';
-        prompt.style.display = 'none';
-        
-        info.innerHTML = `
-            <strong>Dimensions:</strong> ${imageData.width} x ${imageData.height}<br>
-            <strong>Format:</strong> ${imageData.format}<br>
-            <strong>Size:</strong> ${this.formatFileSize(imageData.width * imageData.height * 3)}<br>
-            <strong>Filename:</strong> ${imageData.filename}
-        `;
-        info.style.display = 'block';
+        if (img && prompt && info) {
+            img.src = imageData.preview;
+            img.style.display = 'block';
+            prompt.style.display = 'none';
+            
+            info.innerHTML = `
+                <strong>Dimensions:</strong> ${imageData.width} x ${imageData.height}<br>
+                <strong>Format:</strong> ${imageData.format}<br>
+                <strong>Size:</strong> ${this.formatFileSize(imageData.width * imageData.height * 3)}<br>
+                <strong>Filename:</strong> ${imageData.filename}
+            `;
+            info.style.display = 'block';
+        }
     }
 
     formatFileSize(bytes) {
@@ -188,14 +232,20 @@ class DungeonSynthApp {
         document.getElementById('resetBtn').disabled = false;
         document.getElementById('processCustomBtn').disabled = false;
         
-        // Enable all download buttons
+        // Enable all download buttons except custom (until processing is done)
         document.querySelectorAll('.download-btn').forEach(btn => {
-            btn.disabled = false;
+            if (!btn.closest('.image-container:last-child')) {
+                btn.disabled = false;
+            }
         });
     }
 
     async processCustom() {
         if (!this.currentFilename || this.isProcessing) return;
+
+        this.showProcessingStatus(true, 'Processing custom settings...', 50);
+        this.customProcessingReady = false;
+        this.updateCustomDownloadStatus();
 
         const params = this.getCurrentParams();
         params.method = 'custom';
@@ -203,19 +253,30 @@ class DungeonSynthApp {
         try {
             const preview = await this.processWithParams(params);
             this.displayProcessedImage('customImage', preview);
+            
+            // Mark custom as ready
+            this.customProcessingReady = true;
+            this.updateCustomDownloadStatus();
+            
+            this.showProcessingStatus(true, 'Custom processing complete!', 100);
+            setTimeout(() => {
+                this.showProcessingStatus(false);
+            }, 1000);
+            
         } catch (error) {
             console.error('Custom processing error:', error);
             this.showStatus(`Processing error: ${error.message}`, 'error');
+            this.showProcessingStatus(false);
         }
     }
 
     getCurrentParams() {
         return {
-            contrast: parseFloat(document.getElementById('contrast').value),
-            brightness: parseInt(document.getElementById('brightness').value),
-            threshold: parseInt(document.getElementById('threshold').value),
-            noise: parseInt(document.getElementById('noise').value),
-            blur: parseFloat(document.getElementById('blur').value)
+            contrast: parseFloat(document.getElementById('contrast')?.value || 1.5),
+            brightness: parseInt(document.getElementById('brightness')?.value || 0),
+            threshold: parseInt(document.getElementById('threshold')?.value || 128),
+            noise: parseInt(document.getElementById('noise')?.value || 20),
+            blur: parseFloat(document.getElementById('blur')?.value || 0)
         };
     }
 
@@ -254,7 +315,7 @@ class DungeonSynthApp {
 
         // Process and display
         try {
-            this.showProcessingStatus(true, `Applying ${presetName} preset...`);
+            this.showProcessingStatus(true, `Applying ${presetName} preset...`, 30);
             
             const preview = await this.processWithParams(params);
             const imageMap = {
@@ -269,9 +330,17 @@ class DungeonSynthApp {
             this.displayProcessedImage(imageMap[presetName] || 'customImage', preview);
             this.displayProcessedImage('customImage', preview); // Also update custom
             
+            // Mark custom as ready since sliders updated
+            this.customProcessingReady = true;
+            this.updateCustomDownloadStatus();
+            
+            this.showProcessingStatus(true, `${presetName} preset applied!`, 100);
+            setTimeout(() => {
+                this.showProcessingStatus(false);
+            }, 1000);
+            
         } catch (error) {
             this.showStatus(`Processing error: ${error.message}`, 'error');
-        } finally {
             this.showProcessingStatus(false);
         }
     }
@@ -282,7 +351,7 @@ class DungeonSynthApp {
             return;
         }
 
-        this.showProcessingStatus(true, 'Processing all variations...');
+        this.showProcessingStatus(true, 'Processing all variations...', 25);
         
         const presets = [
             { name: 'highContrast', imageId: 'highContrastImage', params: { contrast: 2.5, brightness: 10, threshold: 100, noise: 25, blur: 0, method: 'threshold' }},
@@ -296,7 +365,8 @@ class DungeonSynthApp {
         try {
             for (let i = 0; i < presets.length; i++) {
                 const preset = presets[i];
-                this.showProcessingStatus(true, `Processing ${preset.name} (${i + 1}/${presets.length})...`);
+                const progress = 25 + (i / presets.length) * 60; // 25% to 85%
+                this.showProcessingStatus(true, `Processing ${preset.name} (${i + 1}/${presets.length})...`, progress);
                 
                 const preview = await this.processWithParams(preset.params);
                 this.displayProcessedImage(preset.imageId, preview);
@@ -306,14 +376,18 @@ class DungeonSynthApp {
             }
             
             // Process custom with current settings
-            this.showProcessingStatus(true, 'Finalizing custom preview...');
+            this.showProcessingStatus(true, 'Finalizing custom preview...', 90);
             await this.processCustom();
             
             this.showStatus('All variations processed successfully!', 'success');
+            this.showProcessingStatus(true, 'All processing complete!', 100);
+            
+            setTimeout(() => {
+                this.showProcessingStatus(false);
+            }, 2000);
             
         } catch (error) {
             this.showStatus(`Processing error: ${error.message}`, 'error');
-        } finally {
             this.showProcessingStatus(false);
         }
     }
@@ -347,12 +421,14 @@ class DungeonSynthApp {
 
     displayProcessedImage(imageId, previewData) {
         const img = document.getElementById(imageId);
-        const placeholder = img.parentElement.querySelector('.processing-placeholder');
+        const placeholder = img?.parentElement?.querySelector('.processing-placeholder');
         
-        img.src = previewData;
-        img.style.display = 'block';
-        if (placeholder) {
-            placeholder.style.display = 'none';
+        if (img) {
+            img.src = previewData;
+            img.style.display = 'block';
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
         }
     }
 
@@ -362,63 +438,22 @@ class DungeonSynthApp {
             return;
         }
 
-        try {
-            this.showStatus('Preparing high-resolution download...', 'info');
-            this.showProcessingStatus(true, 'Generating full-resolution image...');
-            
-            const url = `/download/${presetName}/${this.currentFilename}`;
-            
-            // Create temporary link and trigger download
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `dungeon_synth_${presetName}.png`;
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            this.showStatus('Download started successfully!', 'success');
-            
-        } catch (error) {
-            this.showStatus(`Download error: ${error.message}`, 'error');
-        } finally {
-            setTimeout(() => {
-                this.showProcessingStatus(false);
-            }, 1000);
-        }
-    }
-
-    resetToOriginal() {
-        if (!this.currentFilename) return;
-
-        // Reset all sliders to defaults
-        document.getElementById('contrast').value = 1.5;
-        document.getElementById('brightness').value = 0;
-        document.getElementById('threshold').value = 128;
-        document.getElementById('noise').value = 20;
-        document.getElementById('blur').value = 0;
-        
-        this.updateSliderDisplays();
-        
-        if (!this.isProcessing) {
-            this.processCustom();
-        }
-    }
-
-    async downloadProcessed(presetName) {
-        if (!this.currentFilename) {
-            this.showStatus('Please upload an image first', 'error');
+        // Check if custom processing is ready
+        if (presetName === 'custom' && !this.customProcessingReady) {
+            this.showStatus('Custom processing not ready. Please wait for processing to complete.', 'error');
             return;
         }
 
         try {
             this.showStatus('Preparing high-resolution download...', 'info');
-            this.showProcessingStatus(true, 'Generating full-resolution image...');
+            this.showProcessingStatus(true, 'Generating full-resolution image...', 25);
             
             // If downloading custom, send current parameters first
             if (presetName === 'custom') {
                 const params = this.getCurrentParams();
                 params.method = 'custom';
+                
+                this.showProcessingStatus(true, 'Updating custom parameters...', 50);
                 
                 // Send current custom parameters to server
                 await fetch('/process', {
@@ -432,9 +467,10 @@ class DungeonSynthApp {
                     })
                 });
                 
-                // Small delay to ensure server processes the parameters
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
+            
+            this.showProcessingStatus(true, 'Downloading image...', 75);
             
             const url = `/download/${presetName}/${this.currentFilename}`;
             
@@ -444,6 +480,8 @@ class DungeonSynthApp {
             if (!response.ok) {
                 throw new Error(`Download failed: ${response.statusText}`);
             }
+            
+            this.showProcessingStatus(true, 'Preparing download...', 90);
             
             // Get the blob and create download
             const blob = await response.blob();
@@ -463,6 +501,7 @@ class DungeonSynthApp {
                 URL.revokeObjectURL(downloadUrl);
             }, 1000);
             
+            this.showProcessingStatus(true, 'Download complete!', 100);
             this.showStatus('Download completed successfully!', 'success');
             
         } catch (error) {
@@ -470,7 +509,26 @@ class DungeonSynthApp {
         } finally {
             setTimeout(() => {
                 this.showProcessingStatus(false);
-            }, 1000);
+            }, 1500);
+        }
+    }
+
+    resetToOriginal() {
+        if (!this.currentFilename) return;
+
+        // Reset all sliders to defaults
+        document.getElementById('contrast').value = 1.5;
+        document.getElementById('brightness').value = 0;
+        document.getElementById('threshold').value = 128;
+        document.getElementById('noise').value = 20;
+        document.getElementById('blur').value = 0;
+        
+        this.updateSliderDisplays();
+        this.customProcessingReady = false;
+        this.updateCustomDownloadStatus();
+        
+        if (!this.isProcessing) {
+            this.debounceCustomProcess();
         }
     }
 
