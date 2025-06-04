@@ -487,3 +487,99 @@ img {
     color: #fff !important;
     cursor: not-allowed !important;
 }
+
+/* New atmospheric preset buttons */
+.atmospheric-btn {
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a) !important;
+    border-color: #666 !important;
+    font-size: 13px !important;
+    min-width: 140px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.atmospheric-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3a3a3a, #4a4a4a) !important;
+    border-color: #777 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.atmospheric-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.atmospheric-btn:hover::after {
+    left: 100%;
+}
+
+/* Custom container styling */
+.custom-container {
+    grid-column: 1 / -1;
+    margin-bottom: 20px;
+    background: #1a1a1a;
+    border: 2px solid #444;
+}
+
+.custom-controls {
+    background: #222;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+
+.custom-controls .control-group {
+    margin-bottom: 12px;
+}
+
+.custom-controls label {
+    font-size: 14px;
+    color: #ddd;
+}
+
+.custom-controls input[type="range"] {
+    margin-bottom: 8px;
+}
+
+/* New preset button styling */
+.new-preset {
+    background: linear-gradient(135deg, #2a4a2a, #3a5a3a) !important;
+    border-color: #4a6a4a !important;
+    color: #cfc !important;
+}
+
+.new-preset:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3a5a3a, #4a6a4a) !important;
+    border-color: #5a7a5a !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Grid layout adjustments */
+@media (min-width: 1200px) {
+    .image-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .original-container {
+        grid-column: 1 / 2;
+    }
+    
+    .custom-container {
+        grid-column: 2 / 4;
+    }
+}
+
+@media (max-width: 1199px) {
+    .custom-container {
+        grid-column: 1 / -1;
+    }
+}
+

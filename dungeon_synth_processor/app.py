@@ -27,20 +27,14 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Initialize processor
 processor = DungeonSynthProcessor()
 
-# Store current settings for custom downloads
-current_custom_params = {
-    'contrast': 1.5,
-    'brightness': 0,
-    'threshold': 128,
-    'noise': 20,
-    'blur': 0,
-    'method': 'custom'
-}
+# Store processed preview images for download
+preview_cache = {}
 
 # Cleanup on app shutdown
 def cleanup_on_exit():
     try:
         processor.cleanup()
+        preview_cache.clear()
         logger.info("Application shutdown - cleaned up temporary files")
     except Exception as e:
         logger.error(f"Cleanup error: {e}")
@@ -114,6 +108,9 @@ def upload_file():
                 # Create 400x400 preview matching web app
                 preview_base64 = processor.create_preview_base64(img)
             
+            # Initialize preview cache for this file
+            preview_cache[filename] = {}
+            
             logger.info(f"Image uploaded successfully: {filename} ({width}x{height})")
             
             return jsonify({
@@ -139,8 +136,6 @@ def upload_file():
 @app.route('/process', methods=['POST'])
 def process_image():
     """Process image with given parameters and return preview"""
-    global current_custom_params
-    
     try:
         data = request.get_json()
         if not data:
@@ -184,12 +179,16 @@ def process_image():
             'method': method
         }
         
-        # Store custom parameters for downloads
-        if method == 'custom':
-            current_custom_params = params.copy()
-        
         # Process and return base64 preview
         preview_base64 = processor.process_preview(filepath, params)
+        
+        # Cache the processed preview for download
+        # Convert base64 back to PIL Image for caching
+        image_data = base64.b64decode(preview_base64.split(',')[1])
+        processed_image = Image.open(io.BytesIO(image_data))
+        
+        # Store in cache with method as key
+        preview_cache[filename][method] = processed_image.copy()
         
         return jsonify({
             'success': True,
@@ -202,7 +201,7 @@ def process_image():
 
 @app.route('/download/<preset_name>/<filename>')
 def download_processed(preset_name, filename):
-    """Download processed image at full resolution"""
+    """Download the exact 400x400 processed preview image"""
     try:
         # Validate preset name
         if preset_name not in PROCESSING_PRESETS and preset_name != 'custom':
@@ -212,34 +211,37 @@ def download_processed(preset_name, filename):
         if not os.path.exists(filepath):
             return jsonify({'error': 'Original file not found'}), 404
         
-        # Get preset parameters matching web app exactly
-        if preset_name in PROCESSING_PRESETS:
-            params = PROCESSING_PRESETS[preset_name].copy()
-        else:
-            # Use stored custom parameters
-            params = current_custom_params.copy()
+        # Check if we have the processed preview cached
+        if filename not in preview_cache:
+            return jsonify({'error': 'No processed preview found. Please process the image first.'}), 404
         
-        # Process at full resolution
-        output_path = processor.process_full_resolution(filepath, params, preset_name)
+        # For presets, process the image if not already cached
+        if preset_name not in preview_cache[filename]:
+            # Get preset parameters
+            if preset_name in PROCESSING_PRESETS:
+                params = PROCESSING_PRESETS[preset_name].copy()
+                preview_base64 = processor.process_preview(filepath, params)
+                
+                # Cache the result
+                image_data = base64.b64decode(preview_base64.split(',')[1])
+                processed_image = Image.open(io.BytesIO(image_data))
+                preview_cache[filename][preset_name] = processed_image.copy()
+            else:
+                return jsonify({'error': 'Preset not found'}), 404
         
-        if not os.path.exists(output_path):
-            return jsonify({'error': 'Failed to generate processed image'}), 500
+        # Get the cached processed image
+        processed_image = preview_cache[filename][preset_name]
         
-        logger.info(f"Download started: {preset_name} - {filename}")
+        # Save to temporary file for download
+        temp_path = os.path.join(processor.temp_dir, f"download_{preset_name}_{filename}.png")
+        processed_image.save(temp_path, 'PNG')
         
-        # Use send_file with proper cleanup
-        def remove_file(response):
-            try:
-                if os.path.exists(output_path):
-                    os.remove(output_path)
-            except Exception:
-                pass
-            return response
+        logger.info(f"Download started: {preset_name} - {filename} (400x400)")
         
         return send_file(
-            output_path,
+            temp_path,
             as_attachment=True,
-            download_name=f'dungeon_synth_{preset_name}.png',
+            download_name=f'dungeon_synth_{preset_name}_400x400.png',
             mimetype='image/png'
         )
         
@@ -254,12 +256,17 @@ def get_presets():
 
 @app.route('/cleanup/<filename>', methods=['POST'])
 def cleanup_file(filename):
-    """Clean up uploaded file"""
+    """Clean up uploaded file and cached previews"""
     try:
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         if os.path.exists(filepath):
             os.remove(filepath)
             logger.info(f"Cleaned up file: {filename}")
+        
+        # Clean up cached previews
+        if filename in preview_cache:
+            del preview_cache[filename]
+            
         return jsonify({'success': True})
     except Exception as e:
         logger.error(f"Cleanup error: {str(e)}")
@@ -283,7 +290,6 @@ def find_free_port():
     sock.close()
     return port
 
-# In the main section, replace the app.run() with:
 if __name__ == '__main__':
     logger.info("Starting Dungeon Synth Processor...")
     logger.info(f"Upload folder: {app.config['UPLOAD_FOLDER']}")

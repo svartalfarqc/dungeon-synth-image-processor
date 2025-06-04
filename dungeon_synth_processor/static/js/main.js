@@ -10,21 +10,26 @@ class DungeonSynthApp {
 
     initializeEventListeners() {
         // File upload
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            this.handleFileUpload(e);
-        });
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                this.handleFileUpload(e);
+            });
+        }
 
         // Slider events with debounced processing
         const sliders = ['contrast', 'brightness', 'threshold', 'noise', 'blur'];
         sliders.forEach(slider => {
             const element = document.getElementById(slider);
-            element.addEventListener('input', () => {
-                this.updateSliderDisplay(slider);
-                // Mark custom as not ready and update status
-                this.customProcessingReady = false;
-                this.updateCustomDownloadStatus();
-                this.debounceCustomProcess();
-            });
+            if (element) {
+                element.addEventListener('input', () => {
+                    this.updateSliderDisplay(slider);
+                    // Mark custom as not ready and update status
+                    this.customProcessingReady = false;
+                    this.updateCustomDownloadStatus();
+                    this.debounceCustomProcess();
+                });
+            }
         });
 
         // Add drag and drop functionality
@@ -56,7 +61,7 @@ class DungeonSynthApp {
         uploadPrompt.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             const files = dt.files;
-            if (files.length > 0) {
+            if (files.length > 0 && fileInput) {
                 fileInput.files = files;
                 this.handleFileUpload({ target: { files: files } });
             }
@@ -116,10 +121,10 @@ class DungeonSynthApp {
     }
 
     updateCustomDownloadStatus() {
-        const customDownloadBtn = document.querySelector('.image-container:last-child .download-btn');
+        const customDownloadBtn = document.querySelector('.custom-container .download-btn');
         if (customDownloadBtn) {
             if (this.customProcessingReady) {
-                customDownloadBtn.textContent = 'Download Ready ✓';
+                customDownloadBtn.textContent = 'Download Custom';
                 customDownloadBtn.classList.add('ready');
                 customDownloadBtn.classList.remove('processing');
                 customDownloadBtn.disabled = false;
@@ -228,13 +233,16 @@ class DungeonSynthApp {
     }
 
     enableControls() {
-        document.getElementById('processAllBtn').disabled = false;
-        document.getElementById('resetBtn').disabled = false;
-        document.getElementById('processCustomBtn').disabled = false;
+        // Enable main action buttons
+        const processAllBtn = document.getElementById('processAllBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        if (processAllBtn) processAllBtn.disabled = false;
+        if (resetBtn) resetBtn.disabled = false;
         
         // Enable all download buttons except custom (until processing is done)
         document.querySelectorAll('.download-btn').forEach(btn => {
-            if (!btn.closest('.image-container:last-child')) {
+            if (!btn.closest('.custom-container')) {
                 btn.disabled = false;
             }
         });
@@ -298,18 +306,27 @@ class DungeonSynthApp {
             'atmospheric': { contrast: 1.6, brightness: -10, threshold: 140, noise: 20, blur: 1.5, method: 'atmospheric' },
             'silhouette': { contrast: 3, brightness: 20, threshold: 70, noise: 10, blur: 0, method: 'silhouette' },
             'manuscript': { contrast: 2, brightness: 15, threshold: 120, noise: 40, blur: 0.5, method: 'manuscript' },
-            'ghostly': { contrast: 1.3, brightness: 30, threshold: 180, noise: 30, blur: 2, method: 'ghostly' }
+            'ghostly': { contrast: 1.3, brightness: 30, threshold: 180, noise: 30, blur: 2, method: 'ghostly' },
+            'cavernDeep': { contrast: 2.8, brightness: -30, threshold: 90, noise: 35, blur: 0.8, method: 'cavern' },
+            'frozenWastes': { contrast: 3.2, brightness: 40, threshold: 110, noise: 15, blur: 0, method: 'frozen' },
+            'darkRitual': { contrast: 2.6, brightness: -15, threshold: 85, noise: 45, blur: 1.2, method: 'ritual' }
         };
 
         const params = presets[presetName];
         if (!params) return;
 
         // Update UI sliders
-        document.getElementById('contrast').value = params.contrast;
-        document.getElementById('brightness').value = params.brightness;
-        document.getElementById('threshold').value = params.threshold;
-        document.getElementById('noise').value = params.noise;
-        document.getElementById('blur').value = params.blur;
+        const contrastSlider = document.getElementById('contrast');
+        const brightnessSlider = document.getElementById('brightness');
+        const thresholdSlider = document.getElementById('threshold');
+        const noiseSlider = document.getElementById('noise');
+        const blurSlider = document.getElementById('blur');
+        
+        if (contrastSlider) contrastSlider.value = params.contrast;
+        if (brightnessSlider) brightnessSlider.value = params.brightness;
+        if (thresholdSlider) thresholdSlider.value = params.threshold;
+        if (noiseSlider) noiseSlider.value = params.noise;
+        if (blurSlider) blurSlider.value = params.blur;
         
         this.updateSliderDisplays();
 
@@ -324,7 +341,10 @@ class DungeonSynthApp {
                 'atmospheric': 'atmosphericImage',
                 'silhouette': 'silhouetteImage',
                 'manuscript': 'manuscriptImage',
-                'ghostly': 'ghostlyImage'
+                'ghostly': 'ghostlyImage',
+                'cavernDeep': 'cavernDeepImage',
+                'frozenWastes': 'frozenWastesImage',
+                'darkRitual': 'darkRitualImage'
             };
             
             this.displayProcessedImage(imageMap[presetName] || 'customImage', preview);
@@ -359,7 +379,10 @@ class DungeonSynthApp {
             { name: 'atmospheric', imageId: 'atmosphericImage', params: { contrast: 1.6, brightness: -10, threshold: 140, noise: 20, blur: 1.5, method: 'atmospheric' }},
             { name: 'silhouette', imageId: 'silhouetteImage', params: { contrast: 3, brightness: 20, threshold: 70, noise: 10, blur: 0, method: 'silhouette' }},
             { name: 'manuscript', imageId: 'manuscriptImage', params: { contrast: 2, brightness: 15, threshold: 120, noise: 40, blur: 0.5, method: 'manuscript' }},
-            { name: 'ghostly', imageId: 'ghostlyImage', params: { contrast: 1.3, brightness: 30, threshold: 180, noise: 30, blur: 2, method: 'ghostly' }}
+            { name: 'ghostly', imageId: 'ghostlyImage', params: { contrast: 1.3, brightness: 30, threshold: 180, noise: 30, blur: 2, method: 'ghostly' }},
+            { name: 'cavernDeep', imageId: 'cavernDeepImage', params: { contrast: 2.8, brightness: -30, threshold: 90, noise: 35, blur: 0.8, method: 'cavern' }},
+            { name: 'frozenWastes', imageId: 'frozenWastesImage', params: { contrast: 3.2, brightness: 40, threshold: 110, noise: 15, blur: 0, method: 'frozen' }},
+            { name: 'darkRitual', imageId: 'darkRitualImage', params: { contrast: 2.6, brightness: -15, threshold: 85, noise: 45, blur: 1.2, method: 'ritual' }}
         ];
 
         try {
@@ -517,11 +540,17 @@ class DungeonSynthApp {
         if (!this.currentFilename) return;
 
         // Reset all sliders to defaults
-        document.getElementById('contrast').value = 1.5;
-        document.getElementById('brightness').value = 0;
-        document.getElementById('threshold').value = 128;
-        document.getElementById('noise').value = 20;
-        document.getElementById('blur').value = 0;
+        const contrastSlider = document.getElementById('contrast');
+        const brightnessSlider = document.getElementById('brightness');
+        const thresholdSlider = document.getElementById('threshold');
+        const noiseSlider = document.getElementById('noise');
+        const blurSlider = document.getElementById('blur');
+        
+        if (contrastSlider) contrastSlider.value = 1.5;
+        if (brightnessSlider) brightnessSlider.value = 0;
+        if (thresholdSlider) thresholdSlider.value = 128;
+        if (noiseSlider) noiseSlider.value = 20;
+        if (blurSlider) blurSlider.value = 0;
         
         this.updateSliderDisplays();
         this.customProcessingReady = false;
@@ -548,23 +577,23 @@ class DungeonSynthApp {
 let app;
 
 function applyPreset(presetName) {
-    app.applyPreset(presetName);
+    if (app) app.applyPreset(presetName);
 }
 
 function processAllPresets() {
-    app.processAllPresets();
+    if (app) app.processAllPresets();
 }
 
 function resetToOriginal() {
-    app.resetToOriginal();
+    if (app) app.resetToOriginal();
 }
 
 function processCustom() {
-    app.processCustom();
+    if (app) app.processCustom();
 }
 
 function downloadProcessed(presetName) {
-    app.downloadProcessed(presetName);
+    if (app) app.downloadProcessed(presetName);
 }
 
 // Initialize app when page loads
@@ -573,6 +602,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Cleanup on page unload
     window.addEventListener('beforeunload', function() {
-        app.cleanup();
+        if (app) app.cleanup();
     });
 });

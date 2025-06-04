@@ -1,10 +1,10 @@
 # presets.py
 """
-Processing presets that exactly match the web application's preset buttons
-Each preset contains the exact same parameters used in the JavaScript version
+Clean dungeon synth presets focused on effective black & white processing
 """
 
 PROCESSING_PRESETS = {
+    # Original 6 presets (preserved exactly)
     'highContrast': {
         'contrast': 2.5,
         'brightness': 10,
@@ -69,6 +69,40 @@ PROCESSING_PRESETS = {
         'method': 'ghostly',
         'name': 'Ghostly Apparition',
         'description': 'Ethereal blur with bright midtones'
+    },
+    
+    # 3 NEW DUNGEON SYNTH PRESETS (inspired by your examples)
+    'cavernDeep': {
+        'contrast': 2.8,
+        'brightness': -30,
+        'threshold': 90,
+        'noise': 35,
+        'blur': 0.8,
+        'method': 'cavern',
+        'name': 'Cavern Deep',
+        'description': 'Deep shadows with mysterious tunnels'
+    },
+    
+    'frozenWastes': {
+        'contrast': 3.2,
+        'brightness': 40,
+        'threshold': 110,
+        'noise': 15,
+        'blur': 0,
+        'method': 'frozen',
+        'name': 'Frozen Wastes',
+        'description': 'Stark, minimalist winter landscapes'
+    },
+    
+    'darkRitual': {
+        'contrast': 2.6,
+        'brightness': -15,
+        'threshold': 85,
+        'noise': 45,
+        'blur': 1.2,
+        'method': 'ritual',
+        'name': 'Dark Ritual',
+        'description': 'Dramatic contrast for ritual atmospheres'
     }
 }
 

@@ -24,37 +24,14 @@
                 <button onclick="applyPreset('silhouette')">Silhouette</button>
                 <button onclick="applyPreset('manuscript')">Medieval Manuscript</button>
                 <button onclick="applyPreset('ghostly')">Ghostly</button>
-            </div>
-            
-            <div class="control-group">
-                <label for="contrast">Contrast: <span id="contrastValue">1.5</span></label>
-                <input type="range" id="contrast" min="0.5" max="3" step="0.1" value="1.5">
-            </div>
-            
-            <div class="control-group">
-                <label for="brightness">Brightness: <span id="brightnessValue">0</span></label>
-                <input type="range" id="brightness" min="-100" max="100" step="5" value="0">
-            </div>
-            
-            <div class="control-group">
-                <label for="threshold">Threshold: <span id="thresholdValue">128</span></label>
-                <input type="range" id="threshold" min="0" max="255" step="5" value="128">
-            </div>
-            
-            <div class="control-group">
-                <label for="noise">Grain/Noise: <span id="noiseValue">20</span></label>
-                <input type="range" id="noise" min="0" max="50" step="5" value="20">
-            </div>
-            
-            <div class="control-group">
-                <label for="blur">Atmospheric Blur: <span id="blurValue">0</span></label>
-                <input type="range" id="blur" min="0" max="5" step="0.5" value="0">
+                <button onclick="applyPreset('cavernDeep')" class="new-preset">🕳️ Cavern Deep</button>
+                <button onclick="applyPreset('frozenWastes')" class="new-preset">❄️ Frozen Wastes</button>
+                <button onclick="applyPreset('darkRitual')" class="new-preset">🔮 Dark Ritual</button>
             </div>
             
             <div class="action-buttons">
                 <button onclick="processAllPresets()" id="processAllBtn" disabled>Generate All Variations</button>
                 <button onclick="resetToOriginal()" id="resetBtn" disabled>Reset to Original</button>
-                <button onclick="processCustom()" id="processCustomBtn" disabled>Apply Custom Settings</button>
             </div>
         </div>
         
@@ -72,19 +49,50 @@
                 <div class="image-info" id="imageInfo" style="display: none;"></div>
             </div>
             
-            <div class="image-container">
-                <h3>Threshold</h3>
+            <!-- CUSTOM PROCESSING SECTION WITH SLIDERS -->
+            <div class="image-container custom-container">
+                <h3>Custom Processing</h3>
                 <div class="image-wrapper">
-                    <img id="thresholdImage" class="preview-image" style="display: none;">
+                    <img id="customImage" class="preview-image" style="display: none;">
                     <div class="processing-placeholder">
-                        <div class="placeholder-icon">🔳</div>
-                        <p>Processing preview will appear here</p>
+                        <div class="placeholder-icon">🎛️</div>
+                        <p>Custom preview will appear here</p>
                     </div>
                 </div>
-                <button class="download-btn" onclick="downloadProcessed('threshold')" disabled>Download</button>
-                <div class="effect-info">Clean threshold processing</div>
+                
+                <!-- SLIDERS RIGHT BELOW CUSTOM IMAGE -->
+                <div class="custom-controls">
+                    <div class="control-group">
+                        <label for="contrast">Contrast: <span id="contrastValue">1.5</span></label>
+                        <input type="range" id="contrast" min="0.5" max="3" step="0.1" value="1.5">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="brightness">Brightness: <span id="brightnessValue">0</span></label>
+                        <input type="range" id="brightness" min="-100" max="100" step="5" value="0">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="threshold">Threshold: <span id="thresholdValue">128</span></label>
+                        <input type="range" id="threshold" min="0" max="255" step="5" value="128">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="noise">Grain/Noise: <span id="noiseValue">20</span></label>
+                        <input type="range" id="noise" min="0" max="50" step="5" value="20">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="blur">Atmospheric Blur: <span id="blurValue">0</span></label>
+                        <input type="range" id="blur" min="0" max="5" step="0.5" value="0">
+                    </div>
+                </div>
+                
+                <button class="download-btn" onclick="downloadProcessed('custom')" disabled>Download Custom</button>
+                <div class="effect-info">Live preview with current slider settings</div>
             </div>
             
+            <!-- PRESET IMAGES -->
             <div class="image-container">
                 <h3>High Contrast Threshold</h3>
                 <div class="image-wrapper">
@@ -96,6 +104,19 @@
                 </div>
                 <button class="download-btn" onclick="downloadProcessed('highContrast')" disabled>Download</button>
                 <div class="effect-info">Pure black & white with dramatic contrast</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Threshold</h3>
+                <div class="image-wrapper">
+                    <img id="thresholdImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">🔳</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('threshold')" disabled>Download</button>
+                <div class="effect-info">Clean threshold processing</div>
             </div>
             
             <div class="image-container">
@@ -150,17 +171,44 @@
                 <div class="effect-info">Ethereal blur with bright midtones</div>
             </div>
             
+            <!-- NEW PRESETS -->
             <div class="image-container">
-                <h3>Custom Processing</h3>
+                <h3>Cavern Deep</h3>
                 <div class="image-wrapper">
-                    <img id="customImage" class="preview-image" style="display: none;">
+                    <img id="cavernDeepImage" class="preview-image" style="display: none;">
                     <div class="processing-placeholder">
-                        <div class="placeholder-icon">🎛️</div>
-                        <p>Custom preview will appear here</p>
+                        <div class="placeholder-icon">🕳️</div>
+                        <p>Processing preview will appear here</p>
                     </div>
                 </div>
-                <button class="download-btn" onclick="downloadProcessed('custom')" disabled>Download</button>
-                <div class="effect-info">Live preview with current slider settings</div>
+                <button class="download-btn" onclick="downloadProcessed('cavernDeep')" disabled>Download</button>
+                <div class="effect-info">Deep shadows with mysterious tunnels</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Frozen Wastes</h3>
+                <div class="image-wrapper">
+                    <img id="frozenWastesImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">❄️</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('frozenWastes')" disabled>Download</button>
+                <div class="effect-info">Stark, minimalist winter landscapes</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>Dark Ritual</h3>
+                <div class="image-wrapper">
+                    <img id="darkRitualImage" class="preview-image" style="display: none;">
+                    <div class="processing-placeholder">
+                        <div class="placeholder-icon">🔮</div>
+                        <p>Processing preview will appear here</p>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="downloadProcessed('darkRitual')" disabled>Download</button>
+                <div class="effect-info">Dramatic contrast for ritual atmospheres</div>
             </div>
         </div>
         
@@ -171,9 +219,6 @@
                 <div class="progress-fill"></div>
             </div>
         </div>
-
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
-        <div id="successMessage" class="success-message" style="display: none;"></div>
     </div>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
