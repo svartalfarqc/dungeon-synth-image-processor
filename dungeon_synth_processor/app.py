@@ -7,7 +7,7 @@ import logging
 import signal
 import sys
 from werkzeug.utils import secure_filename
-from PIL import Image
+from PIL import Image, ImageOps
 import io
 import base64
 
@@ -135,6 +135,20 @@ def upload_file():
             
             # Validate image
             with Image.open(filepath) as img:
+                # Force load and apply EXIF orientation correction (crucial for HEIC)
+                img.load()
+                img = ImageOps.exif_transpose(img)
+                
+                # Convert problematic modes to RGB (HEIC files can have unusual color modes)
+                if img.mode not in ('RGB', 'L'):
+                    if img.mode == 'RGBA':
+                        # Handle transparency by creating white background
+                        background = Image.new('RGB', img.size, (255, 255, 255))
+                        background.paste(img, mask=img.split()[-1])
+                        img = background
+                    else:
+                        img = img.convert('RGB')
+                
                 if not validate_image_size(img):
                     os.remove(filepath)  # Clean up invalid file
                     return jsonify({'error': f'Image too large. Maximum dimensions: {MAX_DIMENSION}x{MAX_DIMENSION}'}), 400

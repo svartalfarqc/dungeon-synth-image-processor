@@ -21,8 +21,18 @@ class DungeonSynthProcessor:
     def create_preview_base64(self, image):
         """Create 400x400 preview with proper orientation handling"""
         try:
-            # Fix orientation from EXIF data
+            # Fix orientation from EXIF data (crucial for HEIC files)
             image = ImageOps.exif_transpose(image)
+            
+            # Ensure proper color mode for processing (HEIC files can have unusual modes)
+            if image.mode not in ('RGB', 'L'):
+                if image.mode == 'RGBA':
+                    # Handle transparency by compositing on white background
+                    background = Image.new('RGB', image.size, (255, 255, 255))
+                    background.paste(image, mask=image.split()[-1])
+                    image = background
+                else:
+                    image = image.convert('RGB')
             
             # Calculate crop dimensions to maintain aspect ratio and center the image
             width, height = image.size
@@ -50,8 +60,17 @@ class DungeonSynthProcessor:
             img = Image.open(filepath)
             img.load()
             
-            # Fix orientation from EXIF data
+            # Fix orientation from EXIF data (essential for HEIC files)
             img = ImageOps.exif_transpose(img)
+            
+            # Ensure proper color mode (HEIC files can have unusual color modes)
+            if img.mode not in ('RGB', 'L'):
+                if img.mode == 'RGBA':
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    background.paste(img, mask=img.split()[-1])
+                    img = background
+                else:
+                    img = img.convert('RGB')
             
             if not self._validate_image(img):
                 img.close()
@@ -136,6 +155,15 @@ class DungeonSynthProcessor:
     
     def _create_square_preview(self, image, size):
         """Create square preview matching web app crop logic"""
+        # Ensure proper color mode before processing (handles HEIC edge cases)
+        if image.mode not in ('RGB', 'L'):
+            if image.mode == 'RGBA':
+                background = Image.new('RGB', image.size, (255, 255, 255))
+                background.paste(image, mask=image.split()[-1])
+                image = background
+            else:
+                image = image.convert('RGB')
+        
         width, height = image.size
         crop_size = min(width, height)
         sx = (width - crop_size) // 2
