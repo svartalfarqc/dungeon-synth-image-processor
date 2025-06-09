@@ -11,15 +11,6 @@ from PIL import Image, ImageOps
 import io
 import base64
 
-# HEIC support - MUST be imported before any PIL operations
-HEIC_SUPPORTED = False
-try:
-    from pillow_heif import register_heif_opener
-    register_heif_opener()
-    HEIC_SUPPORTED = True
-except ImportError:
-    pass
-
 from image_processor import DungeonSynthProcessor
 from presets import PROCESSING_PRESETS
 
@@ -59,8 +50,8 @@ atexit.register(cleanup_on_exit)
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-# Updated allowed extensions to include HEIC
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'tiff', 'bmp', 'webp', 'tif', 'heic', 'heif'}
+# Allowed image extensions
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'tiff', 'bmp', 'webp', 'tif'}
 MAX_DIMENSION = 20000  # Maximum width or height
 
 def allowed_file(filename):
@@ -68,11 +59,6 @@ def allowed_file(filename):
         return False
     
     extension = filename.rsplit('.', 1)[1].lower()
-    
-    # For HEIC files, check if support is available
-    if extension in {'heic', 'heif'}:
-        return HEIC_SUPPORTED
-    
     return extension in ALLOWED_EXTENSIONS
 
 def validate_image_size(image):
@@ -113,16 +99,8 @@ def upload_file():
         
         extension = file.filename.rsplit('.', 1)[1].lower()
         
-        # Special handling for HEIC files
-        if extension in {'heic', 'heif'}:
-            if not HEIC_SUPPORTED:
-                return jsonify({
-                    'error': 'HEIC/HEIF files are not supported. Please install pillow-heif: pip install pillow-heif'
-                }), 400
-        elif extension not in ALLOWED_EXTENSIONS:
+        if extension not in ALLOWED_EXTENSIONS:
             supported_formats = list(ALLOWED_EXTENSIONS)
-            if not HEIC_SUPPORTED:
-                supported_formats = [f for f in supported_formats if f not in {'heic', 'heif'}]
             return jsonify({
                 'error': f'Invalid file type. Supported formats: {", ".join(supported_formats).upper()}'
             }), 400
@@ -135,11 +113,11 @@ def upload_file():
             
             # Validate image
             with Image.open(filepath) as img:
-                # Force load and apply EXIF orientation correction (crucial for HEIC)
+                # Force load and apply EXIF orientation correction
                 img.load()
                 img = ImageOps.exif_transpose(img)
                 
-                # Convert problematic modes to RGB (HEIC files can have unusual color modes)
+                # Convert problematic modes to RGB
                 if img.mode not in ('RGB', 'L'):
                     if img.mode == 'RGBA':
                         # Handle transparency by creating white background
@@ -178,12 +156,7 @@ def upload_file():
             if 'filepath' in locals() and os.path.exists(filepath):
                 os.remove(filepath)
             
-            error_msg = str(e)
-            if extension in {'heic', 'heif'}:
-                error_msg = f'HEIC/HEIF processing failed: {error_msg}. Ensure pillow-heif is properly installed.'
-            else:
-                error_msg = f'Invalid or corrupted image file: {error_msg}'
-            
+            error_msg = f'Invalid or corrupted image file: {str(e)}'
             logger.error(f"Image processing error: {error_msg}")
             return jsonify({'error': error_msg}), 400
         
@@ -336,8 +309,7 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'presets_available': len(PROCESSING_PRESETS),
-        'upload_folder': os.path.exists(app.config['UPLOAD_FOLDER']),
-        'heic_support': HEIC_SUPPORTED
+        'upload_folder': os.path.exists(app.config['UPLOAD_FOLDER'])
     })
 
 def find_free_port():
@@ -353,7 +325,7 @@ if __name__ == '__main__':
     logger.info("Starting Dungeon Synth Processor...")
     logger.info(f"Upload folder: {app.config['UPLOAD_FOLDER']}")
     logger.info(f"Max file size: {app.config['MAX_CONTENT_LENGTH'] / (1024*1024):.0f}MB")
-    logger.info(f"HEIC/HEIF support: {'Enabled' if HEIC_SUPPORTED else 'Disabled (install pillow-heif to enable)'}")
+    logger.info(f"Supported formats: {', '.join(ALLOWED_EXTENSIONS).upper()}")
     
     try:
         port = 5000

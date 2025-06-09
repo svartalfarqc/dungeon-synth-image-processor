@@ -3,4 +3,3 @@ Pillow
 numpy
 opencv-python
 Werkzeug
-pillow-heif

@@ -21,10 +21,10 @@ class DungeonSynthProcessor:
     def create_preview_base64(self, image):
         """Create 400x400 preview with proper orientation handling"""
         try:
-            # Fix orientation from EXIF data (crucial for HEIC files)
+            # Fix orientation from EXIF data
             image = ImageOps.exif_transpose(image)
             
-            # Ensure proper color mode for processing (HEIC files can have unusual modes)
+            # Ensure proper color mode for processing
             if image.mode not in ('RGB', 'L'):
                 if image.mode == 'RGBA':
                     # Handle transparency by compositing on white background
@@ -60,10 +60,10 @@ class DungeonSynthProcessor:
             img = Image.open(filepath)
             img.load()
             
-            # Fix orientation from EXIF data (essential for HEIC files)
+            # Fix orientation from EXIF data
             img = ImageOps.exif_transpose(img)
             
-            # Ensure proper color mode (HEIC files can have unusual color modes)
+            # Ensure proper color mode
             if img.mode not in ('RGB', 'L'):
                 if img.mode == 'RGBA':
                     background = Image.new('RGB', img.size, (255, 255, 255))
@@ -155,7 +155,7 @@ class DungeonSynthProcessor:
     
     def _create_square_preview(self, image, size):
         """Create square preview matching web app crop logic"""
-        # Ensure proper color mode before processing (handles HEIC edge cases)
+        # Ensure proper color mode before processing
         if image.mode not in ('RGB', 'L'):
             if image.mode == 'RGBA':
                 background = Image.new('RGB', image.size, (255, 255, 255))

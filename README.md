@@ -7,7 +7,7 @@ A local Python web application for transforming images into dungeon synth album 
 - **Multiple Processing Presets**: High Contrast, Atmospheric, Silhouette, Medieval Manuscript, Ghostly Apparition
 - **Real-time Preview**: Live preview with adjustable parameters
 - **Full Resolution Processing**: Downloads maintain original image quality
-- **Multiple Input Formats**: Supports JPG, PNG, TIFF, BMP, WebP, **HEIC/HEIF**
+- **Multiple Input Formats**: Supports JPG, PNG, TIFF, BMP, WebP
 - **Local Execution**: No internet connection required
 - **Responsive Design**: Works on desktop and mobile
 
@@ -37,50 +37,23 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. HEIC/HEIF Support Setup
-
-For HEIC/HEIF support (Apple Photos format), the `pillow-heif` library is required:
-
-**On macOS:**
-```bash
-# If you encounter issues, you may need to install libheif first
-brew install libheif
-pip install pillow-heif
-```
-
-**On Windows:**
-```bash
-# Usually works out of the box
-pip install pillow-heif
-```
-
-**On Linux (Ubuntu/Debian):**
-```bash
-# Install system dependencies first
-sudo apt-get update
-sudo apt-get install libheif-dev libde265-dev libx265-dev
-pip install pillow-heif
-```
-
-### 4. Run the Application
+### 3. Run the Application
 
 ```bash
 python app.py
 ```
 
-### 5. Open in Browser
+### 4. Open in Browser
 Navigate to: `http://localhost:5000`
-
-The application will show HEIC support status in the console on startup.
 
 ## Project Structure
 
 ```
 dungeon_synth_processor/
-├── app.py                 # Flask application (updated with HEIC support)
+├── app.py                 # Flask application
 ├── image_processor.py     # Core processing logic
 ├── presets.py            # Processing presets
-├── requirements.txt      # Dependencies (includes pillow-heif)
+├── requirements.txt      # Dependencies
 ├── static/
 │   ├── css/
 │   │   └── style.css     # Styling
@@ -94,7 +67,7 @@ dungeon_synth_processor/
 
 ## Usage
 
-1. **Upload Image**: Click "Upload Image" and select your photo (including HEIC files from iPhone/iPad)
+1. **Upload Image**: Click "Upload Image" and select your photo
 2. **Choose Preset**: Click any preset button for instant processing
 3. **Custom Adjustments**: Use sliders for fine-tuning
 4. **Download**: Click download buttons for full-resolution images
@@ -106,7 +79,6 @@ dungeon_synth_processor/
 - **TIFF/TIF**: High-quality format
 - **BMP**: Bitmap format
 - **WebP**: Modern web format
-- **HEIC/HEIF**: Apple's High Efficiency format (iPhone/iPad photos)
 
 ## Processing Methods
 
@@ -162,7 +134,7 @@ dungeon_synth_processor/
 - **Blur**: 0 - 5 pixels (0 default)
 
 ### Processing Pipeline
-1. Image upload and validation (including HEIC format detection)
+1. Image upload and validation
 2. Square crop for preview (maintains aspect ratio)
 3. Blur application (if enabled)
 4. Grayscale conversion (luminosity method)
@@ -171,34 +143,6 @@ dungeon_synth_processor/
 7. Method-specific processing
 8. Noise/grain addition
 9. Final output generation
-
-## HEIC/HEIF Support Details
-
-The application automatically detects and handles HEIC/HEIF files:
-
-- **Automatic Format Detection**: HEIC files are automatically recognized
-- **Metadata Preservation**: EXIF orientation data is preserved
-- **Error Handling**: Clear error messages if HEIC support is unavailable
-- **Fallback Graceful**: App continues to work with other formats if HEIC support fails
-
-### HEIC Troubleshooting
-
-**"HEIC support requires pillow-heif library" error:**
-```bash
-pip install pillow-heif
-```
-
-**Installation issues on macOS:**
-```bash
-brew install libheif
-pip install --no-cache-dir pillow-heif
-```
-
-**Installation issues on Linux:**
-```bash
-sudo apt-get install libheif-dev
-pip install --no-cache-dir pillow-heif
-```
 
 ## VSCode Setup
 
@@ -276,19 +220,6 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-**HEIC Support Issues**
-```bash
-# Reinstall pillow-heif
-pip uninstall pillow-heif
-pip install pillow-heif
-
-# Check if system libraries are needed (Linux)
-sudo apt-get install libheif-dev
-
-# Check if Homebrew libraries are needed (macOS)
-brew install libheif
-```
-
 **Permission Errors**
 ```bash
 # Ensure upload directory is writable
@@ -297,7 +228,6 @@ chmod 755 static/uploads
 
 **Large Image Processing**
 - Images over 10MB may take longer to process
-- HEIC files from modern iPhones can be quite large
 - For very large images, consider resizing before upload
 - Processing time scales with image resolution
 
@@ -307,7 +237,7 @@ For better performance with large images:
 1. The app automatically uses vectorized processing for images > 1MP
 2. Preview generation is optimized for 400x400 display
 3. Full-resolution processing maintains original quality
-4. HEIC files are automatically converted to RGB during processing
+4. Images are automatically converted to RGB during processing
 
 ## Dependencies
 
@@ -316,7 +246,6 @@ For better performance with large images:
 - **NumPy**: Numerical operations
 - **OpenCV**: Advanced image processing
 - **Werkzeug**: WSGI utilities
-- **pillow-heif**: HEIC/HEIF format support
 
 ## License
 
@@ -338,8 +267,9 @@ For issues or questions:
 
 ## Changelog
 
-### v1.1.0
-- Added HEIC/HEIF support
-- Enhanced error handling for unsupported formats
-- Added health check endpoint with format support status
-- Updated documentation with HEIC setup instructions
+### v1.0.0
+- Clean image processing for dungeon synth aesthetics
+- Support for JPG, PNG, TIFF, BMP, WebP formats
+- Multiple processing presets
+- Real-time preview and custom adjustments
+- Full-resolution downloads
