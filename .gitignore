@@ -1,0 +1,20 @@
+# Ignore all common image files everywhere
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.tif
+*.bmp
+*.webp
+
+# Ignore images in any subdirectory
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.tiff
+**/*.tif
+**/*.bmp
+**/*.webp
+
+# Specifically ignore all files in the uploads folder
+static/uploads/
