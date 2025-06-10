@@ -12,7 +12,7 @@ import io
 import base64
 
 from image_processor import DungeonSynthProcessor
-from presets import PROCESSING_PRESETS
+from presets import PROCESSING_PRESETS, COLOR_TINTS, get_color_tint_info
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -182,6 +182,7 @@ def process_image():
             noise = int(data.get('noise', 20))
             blur = float(data.get('blur', 0))
             method = data.get('method', 'custom')
+            color_tint = data.get('color_tint', 'none')
             
             # Validate parameter ranges
             contrast = max(0.1, min(5.0, contrast))
@@ -189,6 +190,10 @@ def process_image():
             threshold = max(0, min(255, threshold))
             noise = max(0, min(100, noise))
             blur = max(0, min(10, blur))
+            
+            # Validate color tint
+            if color_tint not in COLOR_TINTS:
+                color_tint = 'none'
             
         except (ValueError, TypeError):
             return jsonify({'error': 'Invalid parameters provided'}), 400
@@ -207,7 +212,8 @@ def process_image():
             'threshold': threshold,
             'noise': noise,
             'blur': blur,
-            'method': method
+            'method': method,
+            'color_tint': color_tint
         }
         
         # Process and return base64 preview
@@ -218,8 +224,9 @@ def process_image():
         image_data = base64.b64decode(preview_base64.split(',')[1])
         processed_image = Image.open(io.BytesIO(image_data))
         
-        # Store in cache with method as key
-        preview_cache[filename][method] = processed_image.copy()
+        # Store in cache with method and color tint as key
+        cache_key = f"{method}_{color_tint}"
+        preview_cache[filename][cache_key] = processed_image.copy()
         
         return jsonify({
             'success': True,
@@ -247,21 +254,23 @@ def download_processed(preset_name, filename):
             return jsonify({'error': 'No processed preview found. Please process the image first.'}), 404
         
         # For presets, process the image if not already cached
-        if preset_name not in preview_cache[filename]:
+        cache_key = f"{preset_name}_none"  # Default to no color tint for preset downloads
+        if cache_key not in preview_cache[filename]:
             # Get preset parameters
             if preset_name in PROCESSING_PRESETS:
                 params = PROCESSING_PRESETS[preset_name].copy()
+                params['color_tint'] = 'none'  # Default to no tint for preset downloads
                 preview_base64 = processor.process_preview(filepath, params)
                 
                 # Cache the result
                 image_data = base64.b64decode(preview_base64.split(',')[1])
                 processed_image = Image.open(io.BytesIO(image_data))
-                preview_cache[filename][preset_name] = processed_image.copy()
+                preview_cache[filename][cache_key] = processed_image.copy()
             else:
                 return jsonify({'error': 'Preset not found'}), 404
         
         # Get the cached processed image
-        processed_image = preview_cache[filename][preset_name]
+        processed_image = preview_cache[filename][cache_key]
         
         # Save to temporary file for download
         temp_path = os.path.join(processor.temp_dir, f"download_{preset_name}_{filename}.png")
@@ -284,6 +293,11 @@ def download_processed(preset_name, filename):
 def get_presets():
     """Return available processing presets exactly matching web app"""
     return jsonify(PROCESSING_PRESETS)
+
+@app.route('/get_color_tints')
+def get_color_tints():
+    """Return available color tints for UI"""
+    return jsonify(get_color_tint_info())
 
 @app.route('/cleanup/<filename>', methods=['POST'])
 def cleanup_file(filename):
@@ -309,6 +323,7 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'presets_available': len(PROCESSING_PRESETS),
+        'color_tints_available': len(COLOR_TINTS),
         'upload_folder': os.path.exists(app.config['UPLOAD_FOLDER'])
     })
 
@@ -322,10 +337,12 @@ def find_free_port():
     return port
 
 if __name__ == '__main__':
-    logger.info("Starting Dungeon Synth Processor...")
+    logger.info("Starting Enhanced Dungeon Synth Processor...")
     logger.info(f"Upload folder: {app.config['UPLOAD_FOLDER']}")
     logger.info(f"Max file size: {app.config['MAX_CONTENT_LENGTH'] / (1024*1024):.0f}MB")
     logger.info(f"Supported formats: {', '.join(ALLOWED_EXTENSIONS).upper()}")
+    logger.info(f"Available presets: {len(PROCESSING_PRESETS)}")
+    logger.info(f"Available color tints: {len(COLOR_TINTS)}")
     
     try:
         port = 5000

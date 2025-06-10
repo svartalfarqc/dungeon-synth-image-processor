@@ -4,8 +4,20 @@ class DungeonSynthApp {
         this.currentFilename = null;
         this.isProcessing = false;
         this.customProcessingReady = false;
+        this.colorTints = {};
         this.initializeEventListeners();
         this.updateSliderDisplays();
+        this.loadColorTints();
+    }
+
+    async loadColorTints() {
+        try {
+            const response = await fetch('/get_color_tints');
+            this.colorTints = await response.json();
+            this.updateColorPreview();
+        } catch (error) {
+            console.error('Failed to load color tints:', error);
+        }
     }
 
     initializeEventListeners() {
@@ -24,7 +36,6 @@ class DungeonSynthApp {
             if (element) {
                 element.addEventListener('input', () => {
                     this.updateSliderDisplay(slider);
-                    // Mark custom as not ready and update status
                     this.customProcessingReady = false;
                     this.updateCustomDownloadStatus();
                     this.debounceCustomProcess();
@@ -32,8 +43,41 @@ class DungeonSynthApp {
             }
         });
 
+        // Color tint selector
+        const colorTintSelect = document.getElementById('colorTint');
+        if (colorTintSelect) {
+            colorTintSelect.addEventListener('change', () => {
+                this.updateColorPreview();
+                this.customProcessingReady = false;
+                this.updateCustomDownloadStatus();
+                this.debounceCustomProcess();
+            });
+        }
+
         // Add drag and drop functionality
         this.setupDragAndDrop();
+    }
+
+    updateColorPreview() {
+        const colorTintSelect = document.getElementById('colorTint');
+        const colorPreview = document.getElementById('colorPreview');
+        
+        if (!colorTintSelect || !colorPreview) return;
+        
+        const selectedTint = colorTintSelect.value;
+        if (selectedTint === 'none' || !this.colorTints[selectedTint]) {
+            colorPreview.style.display = 'none';
+            return;
+        }
+        
+        const tintData = this.colorTints[selectedTint];
+        if (tintData.color) {
+            colorPreview.style.backgroundColor = tintData.color;
+            colorPreview.style.display = 'inline-block';
+            colorPreview.title = tintData.name;
+        } else {
+            colorPreview.style.display = 'none';
+        }
     }
 
     setupDragAndDrop() {
@@ -233,14 +277,12 @@ class DungeonSynthApp {
     }
 
     enableControls() {
-        // Enable main action buttons
         const processAllBtn = document.getElementById('processAllBtn');
         const resetBtn = document.getElementById('resetBtn');
         
         if (processAllBtn) processAllBtn.disabled = false;
         if (resetBtn) resetBtn.disabled = false;
         
-        // Enable all download buttons except custom (until processing is done)
         document.querySelectorAll('.download-btn').forEach(btn => {
             if (!btn.closest('.custom-container')) {
                 btn.disabled = false;
@@ -262,7 +304,6 @@ class DungeonSynthApp {
             const preview = await this.processWithParams(params);
             this.displayProcessedImage('customImage', preview);
             
-            // Mark custom as ready
             this.customProcessingReady = true;
             this.updateCustomDownloadStatus();
             
@@ -279,12 +320,14 @@ class DungeonSynthApp {
     }
 
     getCurrentParams() {
+        const colorTintSelect = document.getElementById('colorTint');
         return {
             contrast: parseFloat(document.getElementById('contrast')?.value || 1.5),
             brightness: parseInt(document.getElementById('brightness')?.value || 0),
             threshold: parseInt(document.getElementById('threshold')?.value || 128),
             noise: parseInt(document.getElementById('noise')?.value || 20),
-            blur: parseFloat(document.getElementById('blur')?.value || 0)
+            blur: parseFloat(document.getElementById('blur')?.value || 0),
+            color_tint: colorTintSelect?.value || 'none'
         };
     }
 
@@ -299,17 +342,21 @@ class DungeonSynthApp {
             return;
         }
 
-        // Get preset parameters
+        // Updated preset parameters with research-based improvements
         const presets = {
-            'highContrast': { contrast: 2.5, brightness: 10, threshold: 100, noise: 25, blur: 0, method: 'threshold' },
-            'threshold': { contrast: 1.8, brightness: 0, threshold: 80, noise: 15, blur: 0, method: 'threshold' },
-            'atmospheric': { contrast: 1.6, brightness: -10, threshold: 140, noise: 20, blur: 1.5, method: 'atmospheric' },
-            'silhouette': { contrast: 3, brightness: 20, threshold: 70, noise: 10, blur: 0, method: 'silhouette' },
-            'manuscript': { contrast: 2, brightness: 15, threshold: 120, noise: 40, blur: 0.5, method: 'manuscript' },
-            'ghostly': { contrast: 1.3, brightness: 30, threshold: 180, noise: 30, blur: 2, method: 'ghostly' },
-            'cavernDeep': { contrast: 2.8, brightness: -30, threshold: 90, noise: 35, blur: 0.8, method: 'cavern' },
-            'frozenWastes': { contrast: 3.2, brightness: 40, threshold: 110, noise: 15, blur: 0, method: 'frozen' },
-            'darkRitual': { contrast: 2.6, brightness: -15, threshold: 85, noise: 45, blur: 1.2, method: 'ritual' }
+            'medieval': { contrast: 1.4, brightness: -5, threshold: 120, noise: 35, blur: 0.8, method: 'manuscript' },
+            'threshold': { contrast: 1.6, brightness: 0, threshold: 90, noise: 15, blur: 0, method: 'threshold' },
+            'atmospheric': { contrast: 1.3, brightness: -15, threshold: 150, noise: 25, blur: 2.0, method: 'atmospheric' },
+            'silhouette': { contrast: 2.8, brightness: 25, threshold: 75, noise: 8, blur: 0, method: 'silhouette' },
+            'ghostly': { contrast: 1.2, brightness: 35, threshold: 190, noise: 30, blur: 2.5, method: 'ghostly' },
+            'cavernDeep': { contrast: 2.2, brightness: -40, threshold: 85, noise: 40, blur: 1.0, method: 'cavern' },
+            'frozenWastes': { contrast: 2.8, brightness: 50, threshold: 120, noise: 12, blur: 0, method: 'frozen' },
+            'darkRitual': { contrast: 2.4, brightness: -20, threshold: 80, noise: 50, blur: 1.5, method: 'ritual' },
+            // New research-based presets
+            'lithographic': { contrast: 1.8, brightness: 5, threshold: 130, noise: 20, blur: 0.3, method: 'lithographic' },
+            'sepiaNostalgia': { contrast: 1.1, brightness: 20, threshold: 140, noise: 18, blur: 0.7, method: 'sepia' },
+            'comfyHearth': { contrast: 1.0, brightness: 15, threshold: 160, noise: 12, blur: 1.2, method: 'comfy' },
+            'forestMystic': { contrast: 1.3, brightness: -10, threshold: 110, noise: 28, blur: 1.0, method: 'forest' }
         };
 
         const params = presets[presetName];
@@ -330,27 +377,28 @@ class DungeonSynthApp {
         
         this.updateSliderDisplays();
 
-        // Process and display
         try {
             this.showProcessingStatus(true, `Applying ${presetName} preset...`, 30);
             
             const preview = await this.processWithParams(params);
             const imageMap = {
-                'highContrast': 'highContrastImage',
+                'medieval': 'medievalImage',
                 'threshold': 'thresholdImage',
                 'atmospheric': 'atmosphericImage',
                 'silhouette': 'silhouetteImage',
-                'manuscript': 'manuscriptImage',
                 'ghostly': 'ghostlyImage',
                 'cavernDeep': 'cavernDeepImage',
                 'frozenWastes': 'frozenWastesImage',
-                'darkRitual': 'darkRitualImage'
+                'darkRitual': 'darkRitualImage',
+                'lithographic': 'lithographicImage',
+                'sepiaNostalgia': 'sepiaNostalgiaImage',
+                'comfyHearth': 'comfyHearthImage',
+                'forestMystic': 'forestMysticImage'
             };
             
             this.displayProcessedImage(imageMap[presetName] || 'customImage', preview);
-            this.displayProcessedImage('customImage', preview); // Also update custom
+            this.displayProcessedImage('customImage', preview);
             
-            // Mark custom as ready since sliders updated
             this.customProcessingReady = true;
             this.updateCustomDownloadStatus();
             
@@ -374,31 +422,32 @@ class DungeonSynthApp {
         this.showProcessingStatus(true, 'Processing all variations...', 25);
         
         const presets = [
-            { name: 'highContrast', imageId: 'highContrastImage', params: { contrast: 2.5, brightness: 10, threshold: 100, noise: 25, blur: 0, method: 'threshold' }},
-            { name: 'threshold', imageId: 'thresholdImage', params: { contrast: 1.8, brightness: 0, threshold: 80, noise: 15, blur: 0, method: 'threshold' }},
-            { name: 'atmospheric', imageId: 'atmosphericImage', params: { contrast: 1.6, brightness: -10, threshold: 140, noise: 20, blur: 1.5, method: 'atmospheric' }},
-            { name: 'silhouette', imageId: 'silhouetteImage', params: { contrast: 3, brightness: 20, threshold: 70, noise: 10, blur: 0, method: 'silhouette' }},
-            { name: 'manuscript', imageId: 'manuscriptImage', params: { contrast: 2, brightness: 15, threshold: 120, noise: 40, blur: 0.5, method: 'manuscript' }},
-            { name: 'ghostly', imageId: 'ghostlyImage', params: { contrast: 1.3, brightness: 30, threshold: 180, noise: 30, blur: 2, method: 'ghostly' }},
-            { name: 'cavernDeep', imageId: 'cavernDeepImage', params: { contrast: 2.8, brightness: -30, threshold: 90, noise: 35, blur: 0.8, method: 'cavern' }},
-            { name: 'frozenWastes', imageId: 'frozenWastesImage', params: { contrast: 3.2, brightness: 40, threshold: 110, noise: 15, blur: 0, method: 'frozen' }},
-            { name: 'darkRitual', imageId: 'darkRitualImage', params: { contrast: 2.6, brightness: -15, threshold: 85, noise: 45, blur: 1.2, method: 'ritual' }}
+            { name: 'medieval', imageId: 'medievalImage', params: { contrast: 1.4, brightness: -5, threshold: 120, noise: 35, blur: 0.8, method: 'manuscript' }},
+            { name: 'threshold', imageId: 'thresholdImage', params: { contrast: 1.6, brightness: 0, threshold: 90, noise: 15, blur: 0, method: 'threshold' }},
+            { name: 'atmospheric', imageId: 'atmosphericImage', params: { contrast: 1.3, brightness: -15, threshold: 150, noise: 25, blur: 2.0, method: 'atmospheric' }},
+            { name: 'silhouette', imageId: 'silhouetteImage', params: { contrast: 2.8, brightness: 25, threshold: 75, noise: 8, blur: 0, method: 'silhouette' }},
+            { name: 'ghostly', imageId: 'ghostlyImage', params: { contrast: 1.2, brightness: 35, threshold: 190, noise: 30, blur: 2.5, method: 'ghostly' }},
+            { name: 'cavernDeep', imageId: 'cavernDeepImage', params: { contrast: 2.2, brightness: -40, threshold: 85, noise: 40, blur: 1.0, method: 'cavern' }},
+            { name: 'frozenWastes', imageId: 'frozenWastesImage', params: { contrast: 2.8, brightness: 50, threshold: 120, noise: 12, blur: 0, method: 'frozen' }},
+            { name: 'darkRitual', imageId: 'darkRitualImage', params: { contrast: 2.4, brightness: -20, threshold: 80, noise: 50, blur: 1.5, method: 'ritual' }},
+            { name: 'lithographic', imageId: 'lithographicImage', params: { contrast: 1.8, brightness: 5, threshold: 130, noise: 20, blur: 0.3, method: 'lithographic' }},
+            { name: 'sepiaNostalgia', imageId: 'sepiaNostalgiaImage', params: { contrast: 1.1, brightness: 20, threshold: 140, noise: 18, blur: 0.7, method: 'sepia' }},
+            { name: 'comfyHearth', imageId: 'comfyHearthImage', params: { contrast: 1.0, brightness: 15, threshold: 160, noise: 12, blur: 1.2, method: 'comfy' }},
+            { name: 'forestMystic', imageId: 'forestMysticImage', params: { contrast: 1.3, brightness: -10, threshold: 110, noise: 28, blur: 1.0, method: 'forest' }}
         ];
 
         try {
             for (let i = 0; i < presets.length; i++) {
                 const preset = presets[i];
-                const progress = 25 + (i / presets.length) * 60; // 25% to 85%
+                const progress = 25 + (i / presets.length) * 60;
                 this.showProcessingStatus(true, `Processing ${preset.name} (${i + 1}/${presets.length})...`, progress);
                 
                 const preview = await this.processWithParams(preset.params);
                 this.displayProcessedImage(preset.imageId, preview);
                 
-                // Small delay to prevent overwhelming the server
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
             
-            // Process custom with current settings
             this.showProcessingStatus(true, 'Finalizing custom preview...', 90);
             await this.processCustom();
             
@@ -461,7 +510,6 @@ class DungeonSynthApp {
             return;
         }
 
-        // Check if custom processing is ready
         if (presetName === 'custom' && !this.customProcessingReady) {
             this.showStatus('Custom processing not ready. Please wait for processing to complete.', 'error');
             return;
@@ -471,14 +519,12 @@ class DungeonSynthApp {
             this.showStatus('Preparing high-resolution download...', 'info');
             this.showProcessingStatus(true, 'Generating full-resolution image...', 25);
             
-            // If downloading custom, send current parameters first
             if (presetName === 'custom') {
                 const params = this.getCurrentParams();
                 params.method = 'custom';
                 
                 this.showProcessingStatus(true, 'Updating custom parameters...', 50);
                 
-                // Send current custom parameters to server
                 await fetch('/process', {
                     method: 'POST',
                     headers: {
@@ -496,8 +542,6 @@ class DungeonSynthApp {
             this.showProcessingStatus(true, 'Downloading image...', 75);
             
             const url = `/download/${presetName}/${this.currentFilename}`;
-            
-            // Use fetch for better error handling
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -506,11 +550,9 @@ class DungeonSynthApp {
             
             this.showProcessingStatus(true, 'Preparing download...', 90);
             
-            // Get the blob and create download
             const blob = await response.blob();
             const downloadUrl = URL.createObjectURL(blob);
             
-            // Create temporary link and trigger download
             const a = document.createElement('a');
             a.href = downloadUrl;
             a.download = `dungeon_synth_${presetName}.png`;
@@ -519,7 +561,6 @@ class DungeonSynthApp {
             a.click();
             document.body.removeChild(a);
             
-            // Clean up the blob URL
             setTimeout(() => {
                 URL.revokeObjectURL(downloadUrl);
             }, 1000);
@@ -539,20 +580,22 @@ class DungeonSynthApp {
     resetToOriginal() {
         if (!this.currentFilename) return;
 
-        // Reset all sliders to defaults
         const contrastSlider = document.getElementById('contrast');
         const brightnessSlider = document.getElementById('brightness');
         const thresholdSlider = document.getElementById('threshold');
         const noiseSlider = document.getElementById('noise');
         const blurSlider = document.getElementById('blur');
+        const colorTintSelect = document.getElementById('colorTint');
         
         if (contrastSlider) contrastSlider.value = 1.5;
         if (brightnessSlider) brightnessSlider.value = 0;
         if (thresholdSlider) thresholdSlider.value = 128;
         if (noiseSlider) noiseSlider.value = 20;
         if (blurSlider) blurSlider.value = 0;
+        if (colorTintSelect) colorTintSelect.value = 'none';
         
         this.updateSliderDisplays();
+        this.updateColorPreview();
         this.customProcessingReady = false;
         this.updateCustomDownloadStatus();
         
@@ -561,7 +604,6 @@ class DungeonSynthApp {
         }
     }
 
-    // Cleanup function
     async cleanup() {
         if (this.currentFilename) {
             try {
