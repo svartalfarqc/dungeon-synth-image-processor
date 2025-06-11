@@ -226,7 +226,14 @@ def process_image():
         
         # Store in cache with method and color tint as key
         cache_key = f"{method}_{color_tint}"
+        if filename not in preview_cache:
+            preview_cache[filename] = {}
         preview_cache[filename][cache_key] = processed_image.copy()
+        
+        # Also store with just the method name for preset downloads
+        if method != 'custom':
+            preset_cache_key = f"{method}_{color_tint}"
+            preview_cache[filename][preset_cache_key] = processed_image.copy()
         
         return jsonify({
             'success': True,
@@ -249,39 +256,64 @@ def download_processed(preset_name, filename):
         if not os.path.exists(filepath):
             return jsonify({'error': 'Original file not found'}), 404
         
-        # Check if we have the processed preview cached
-        if filename not in preview_cache:
-            return jsonify({'error': 'No processed preview found. Please process the image first.'}), 404
+        # Get the current color tint from request
+        data = request.args
+        color_tint = data.get('tint', 'none')
         
-        # For presets, process the image if not already cached
-        cache_key = f"{preset_name}_none"  # Default to no color tint for preset downloads
-        if cache_key not in preview_cache[filename]:
-            # Get preset parameters
-            if preset_name in PROCESSING_PRESETS:
-                params = PROCESSING_PRESETS[preset_name].copy()
-                params['color_tint'] = 'none'  # Default to no tint for preset downloads
-                preview_base64 = processor.process_preview(filepath, params)
-                
-                # Cache the result
-                image_data = base64.b64decode(preview_base64.split(',')[1])
-                processed_image = Image.open(io.BytesIO(image_data))
-                preview_cache[filename][cache_key] = processed_image.copy()
+        # Create cache key to find the exact processed version
+        cache_key = f"{preset_name}_{color_tint}"
+        
+        # Check if we have this exact version cached
+        if filename in preview_cache and cache_key in preview_cache[filename]:
+            # Use the cached version - this is the exact preview shown
+            processed_image = preview_cache[filename][cache_key]
+        else:
+            # If not cached, we need to reprocess with the exact same parameters
+            logger.info(f"Reprocessing for download: {preset_name} with tint {color_tint}")
+            
+            # Get parameters for this preset
+            if preset_name == 'custom':
+                # For custom, we need to get the current slider values from the request
+                params = {
+                    'contrast': float(data.get('contrast', 1.5)),
+                    'brightness': int(data.get('brightness', 0)),
+                    'threshold': int(data.get('threshold', 128)),
+                    'noise': int(data.get('noise', 20)),
+                    'blur': float(data.get('blur', 0)),
+                    'method': 'custom',
+                    'color_tint': color_tint
+                }
             else:
-                return jsonify({'error': 'Preset not found'}), 404
-        
-        # Get the cached processed image
-        processed_image = preview_cache[filename][cache_key]
+                # For presets, use the preset parameters
+                params = PROCESSING_PRESETS[preset_name].copy()
+                params['color_tint'] = color_tint
+            
+            # Process to get the exact same result
+            preview_base64 = processor.process_preview(filepath, params)
+            
+            # Convert base64 to PIL Image
+            image_data = base64.b64decode(preview_base64.split(',')[1])
+            processed_image = Image.open(io.BytesIO(image_data))
+            
+            # Cache it for future use
+            if filename not in preview_cache:
+                preview_cache[filename] = {}
+            preview_cache[filename][cache_key] = processed_image.copy()
         
         # Save to temporary file for download
-        temp_path = os.path.join(processor.temp_dir, f"download_{preset_name}_{filename}.png")
-        processed_image.save(temp_path, 'PNG')
+        temp_path = os.path.join(processor.temp_dir, f"download_{preset_name}_{color_tint}_{filename}.png")
+        processed_image.save(temp_path, 'PNG', quality=100, optimize=False)
         
-        logger.info(f"Download started: {preset_name} - {filename} (400x400)")
+        # Create filename with color tint if applied
+        tint_suffix = f'_{color_tint}' if color_tint != 'none' else ''
+        download_name = f'dungeon_synth_{preset_name}{tint_suffix}_400x400.png'
+        
+        logger.info(f"Download started: {preset_name} - {filename} with tint {color_tint} (400x400)")
         
         return send_file(
             temp_path,
             as_attachment=True,
-            download_name=f'dungeon_synth_{preset_name}_400x400.png',
+            download_name=download_name,
             mimetype='image/png'
         )
         

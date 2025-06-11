@@ -3,8 +3,9 @@ class DungeonSynthApp {
     constructor() {
         this.currentFilename = null;
         this.isProcessing = false;
-        this.customProcessingReady = false;
+        this.selectedColorTint = 'none';
         this.colorTints = {};
+        this.processedImages = {}; // Store processed images for each preset
         this.initializeEventListeners();
         this.updateSliderDisplays();
         this.loadColorTints();
@@ -14,7 +15,6 @@ class DungeonSynthApp {
         try {
             const response = await fetch('/get_color_tints');
             this.colorTints = await response.json();
-            this.updateColorPreview();
         } catch (error) {
             console.error('Failed to load color tints:', error);
         }
@@ -36,48 +36,109 @@ class DungeonSynthApp {
             if (element) {
                 element.addEventListener('input', () => {
                     this.updateSliderDisplay(slider);
-                    this.customProcessingReady = false;
-                    this.updateCustomDownloadStatus();
                     this.debounceCustomProcess();
                 });
             }
         });
 
-        // Color tint selector
-        const colorTintSelect = document.getElementById('colorTint');
-        if (colorTintSelect) {
-            colorTintSelect.addEventListener('change', () => {
-                this.updateColorPreview();
-                this.customProcessingReady = false;
-                this.updateCustomDownloadStatus();
-                this.debounceCustomProcess();
+        // Color swatch selection
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', (e) => {
+                this.selectColorTint(swatch.dataset.tint);
             });
-        }
+        });
 
         // Add drag and drop functionality
         this.setupDragAndDrop();
     }
 
-    updateColorPreview() {
-        const colorTintSelect = document.getElementById('colorTint');
-        const colorPreview = document.getElementById('colorPreview');
+    selectColorTint(tintName) {
+        // Update selected state
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.classList.remove('selected');
+        });
         
-        if (!colorTintSelect || !colorPreview) return;
-        
-        const selectedTint = colorTintSelect.value;
-        if (selectedTint === 'none' || !this.colorTints[selectedTint]) {
-            colorPreview.style.display = 'none';
-            return;
+        const selectedSwatch = document.querySelector(`.color-swatch[data-tint="${tintName}"]`);
+        if (selectedSwatch) {
+            selectedSwatch.classList.add('selected');
         }
         
-        const tintData = this.colorTints[selectedTint];
-        if (tintData.color) {
-            colorPreview.style.backgroundColor = tintData.color;
-            colorPreview.style.display = 'inline-block';
-            colorPreview.title = tintData.name;
-        } else {
-            colorPreview.style.display = 'none';
+        this.selectedColorTint = tintName;
+        
+        // Reprocess all visible images with new tint
+        if (this.currentFilename && !this.isProcessing) {
+            this.reprocessAllWithNewTint();
         }
+    }
+
+    async reprocessAllWithNewTint() {
+        this.showProcessingStatus(true, 'Applying color tint to all images...', 10);
+        
+        try {
+            // Reprocess each preset that's already been processed
+            const presets = Object.keys(this.processedImages);
+            for (let i = 0; i < presets.length; i++) {
+                const preset = presets[i];
+                const progress = 10 + (i / presets.length) * 80;
+                this.showProcessingStatus(true, `Applying tint to ${preset}...`, progress);
+                
+                if (preset === 'custom') {
+                    await this.processCustom();
+                } else {
+                    await this.reprocessPreset(preset);
+                }
+            }
+            
+            this.showProcessingStatus(true, 'Color tint applied!', 100);
+            setTimeout(() => {
+                this.showProcessingStatus(false);
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Error applying color tint:', error);
+            this.showStatus('Error applying color tint', 'error');
+            this.showProcessingStatus(false);
+        }
+    }
+
+    async reprocessPreset(presetName) {
+        const presets = {
+            'medieval': { contrast: 1.4, brightness: -5, threshold: 120, noise: 35, blur: 0.8, method: 'manuscript' },
+            'threshold': { contrast: 1.6, brightness: 0, threshold: 90, noise: 15, blur: 0, method: 'threshold' },
+            'atmospheric': { contrast: 1.3, brightness: -15, threshold: 150, noise: 25, blur: 2.0, method: 'atmospheric' },
+            'silhouette': { contrast: 2.8, brightness: 25, threshold: 75, noise: 8, blur: 0, method: 'silhouette' },
+            'ghostly': { contrast: 1.2, brightness: 35, threshold: 190, noise: 30, blur: 2.5, method: 'ghostly' },
+            'cavernDeep': { contrast: 2.2, brightness: -40, threshold: 85, noise: 40, blur: 1.0, method: 'cavern' },
+            'frozenWastes': { contrast: 2.8, brightness: 50, threshold: 120, noise: 12, blur: 0, method: 'frozen' },
+            'darkRitual': { contrast: 2.4, brightness: -20, threshold: 80, noise: 50, blur: 1.5, method: 'ritual' },
+            'lithographic': { contrast: 1.8, brightness: 5, threshold: 130, noise: 20, blur: 0.3, method: 'lithographic' },
+            'sepiaNostalgia': { contrast: 1.1, brightness: 20, threshold: 140, noise: 18, blur: 0.7, method: 'sepia' },
+            'comfyHearth': { contrast: 1.0, brightness: 15, threshold: 160, noise: 12, blur: 1.2, method: 'comfy' },
+            'forestMystic': { contrast: 1.3, brightness: -10, threshold: 110, noise: 28, blur: 1.0, method: 'forest' }
+        };
+
+        const params = presets[presetName];
+        if (!params) return;
+
+        params.color_tint = this.selectedColorTint;
+        const preview = await this.processWithParams(params);
+        
+        const imageMap = {
+            'medieval': 'medievalImage',
+            'threshold': 'thresholdImage',
+            'atmospheric': 'atmosphericImage',
+            'silhouette': 'silhouetteImage',
+            'ghostly': 'ghostlyImage',
+            'cavernDeep': 'cavernDeepImage',
+            'frozenWastes': 'frozenWastesImage',
+            'darkRitual': 'darkRitualImage',
+            'lithographic': 'lithographicImage',
+            'sepiaNostalgia': 'sepiaNostalgiaImage',
+            'comfyHearth': 'comfyHearthImage',
+            'forestMystic': 'forestMysticImage'
+        };
+        
+        this.displayProcessedImage(imageMap[presetName], preview);
     }
 
     setupDragAndDrop() {
@@ -164,23 +225,6 @@ class DungeonSynthApp {
         this.isProcessing = show;
     }
 
-    updateCustomDownloadStatus() {
-        const customDownloadBtn = document.querySelector('.custom-container .download-btn');
-        if (customDownloadBtn) {
-            if (this.customProcessingReady) {
-                customDownloadBtn.textContent = 'Download Custom';
-                customDownloadBtn.classList.add('ready');
-                customDownloadBtn.classList.remove('processing');
-                customDownloadBtn.disabled = false;
-            } else {
-                customDownloadBtn.textContent = 'Processing...';
-                customDownloadBtn.classList.add('processing');
-                customDownloadBtn.classList.remove('ready');
-                customDownloadBtn.disabled = true;
-            }
-        }
-    }
-
     debounceCustomProcess() {
         if (this.customProcessTimeout) {
             clearTimeout(this.customProcessTimeout);
@@ -229,6 +273,7 @@ class DungeonSynthApp {
 
             if (result.success) {
                 this.currentFilename = result.filename;
+                this.processedImages = {}; // Reset processed images
                 this.displayOriginalImage(result);
                 this.enableControls();
                 this.showStatus(`Image uploaded successfully (${result.width}x${result.height})`, 'success');
@@ -284,50 +329,43 @@ class DungeonSynthApp {
         if (resetBtn) resetBtn.disabled = false;
         
         document.querySelectorAll('.download-btn').forEach(btn => {
-            if (!btn.closest('.custom-container')) {
-                btn.disabled = false;
-            }
+            btn.disabled = false;
         });
     }
 
     async processCustom() {
         if (!this.currentFilename || this.isProcessing) return;
 
-        this.showProcessingStatus(true, 'Processing custom settings...', 50);
-        this.customProcessingReady = false;
-        this.updateCustomDownloadStatus();
-
         const params = this.getCurrentParams();
         params.method = 'custom';
+        params.color_tint = this.selectedColorTint;
 
         try {
             const preview = await this.processWithParams(params);
             this.displayProcessedImage('customImage', preview);
+            this.processedImages['custom'] = true;
             
-            this.customProcessingReady = true;
-            this.updateCustomDownloadStatus();
-            
-            this.showProcessingStatus(true, 'Custom processing complete!', 100);
-            setTimeout(() => {
-                this.showProcessingStatus(false);
-            }, 1000);
+            // Enable custom download button
+            const customDownloadBtn = document.querySelector('.custom-container .download-btn');
+            if (customDownloadBtn) {
+                customDownloadBtn.disabled = false;
+                customDownloadBtn.classList.add('ready');
+                customDownloadBtn.classList.remove('processing');
+            }
             
         } catch (error) {
             console.error('Custom processing error:', error);
             this.showStatus(`Processing error: ${error.message}`, 'error');
-            this.showProcessingStatus(false);
         }
     }
 
     getCurrentParams() {
-        const colorTintSelect = document.getElementById('colorTint');
         return {
             contrast: parseFloat(document.getElementById('contrast')?.value || 1.5),
             brightness: parseInt(document.getElementById('brightness')?.value || 0),
             threshold: parseInt(document.getElementById('threshold')?.value || 128),
             noise: parseInt(document.getElementById('noise')?.value || 20),
-            blur: parseFloat(document.getElementById('blur')?.value || 0),
-            color_tint: colorTintSelect?.value || 'none'
+            blur: parseFloat(document.getElementById('blur')?.value || 0)
         };
     }
 
@@ -342,7 +380,6 @@ class DungeonSynthApp {
             return;
         }
 
-        // Updated preset parameters with research-based improvements
         const presets = {
             'medieval': { contrast: 1.4, brightness: -5, threshold: 120, noise: 35, blur: 0.8, method: 'manuscript' },
             'threshold': { contrast: 1.6, brightness: 0, threshold: 90, noise: 15, blur: 0, method: 'threshold' },
@@ -352,7 +389,6 @@ class DungeonSynthApp {
             'cavernDeep': { contrast: 2.2, brightness: -40, threshold: 85, noise: 40, blur: 1.0, method: 'cavern' },
             'frozenWastes': { contrast: 2.8, brightness: 50, threshold: 120, noise: 12, blur: 0, method: 'frozen' },
             'darkRitual': { contrast: 2.4, brightness: -20, threshold: 80, noise: 50, blur: 1.5, method: 'ritual' },
-            // New research-based presets
             'lithographic': { contrast: 1.8, brightness: 5, threshold: 130, noise: 20, blur: 0.3, method: 'lithographic' },
             'sepiaNostalgia': { contrast: 1.1, brightness: 20, threshold: 140, noise: 18, blur: 0.7, method: 'sepia' },
             'comfyHearth': { contrast: 1.0, brightness: 15, threshold: 160, noise: 12, blur: 1.2, method: 'comfy' },
@@ -380,7 +416,9 @@ class DungeonSynthApp {
         try {
             this.showProcessingStatus(true, `Applying ${presetName} preset...`, 30);
             
+            params.color_tint = this.selectedColorTint;
             const preview = await this.processWithParams(params);
+            
             const imageMap = {
                 'medieval': 'medievalImage',
                 'threshold': 'thresholdImage',
@@ -398,9 +436,15 @@ class DungeonSynthApp {
             
             this.displayProcessedImage(imageMap[presetName] || 'customImage', preview);
             this.displayProcessedImage('customImage', preview);
+            this.processedImages[presetName] = true;
+            this.processedImages['custom'] = true;
             
-            this.customProcessingReady = true;
-            this.updateCustomDownloadStatus();
+            // Enable custom download button
+            const customDownloadBtn = document.querySelector('.custom-container .download-btn');
+            if (customDownloadBtn) {
+                customDownloadBtn.disabled = false;
+                customDownloadBtn.classList.add('ready');
+            }
             
             this.showProcessingStatus(true, `${presetName} preset applied!`, 100);
             setTimeout(() => {
@@ -442,8 +486,10 @@ class DungeonSynthApp {
                 const progress = 25 + (i / presets.length) * 60;
                 this.showProcessingStatus(true, `Processing ${preset.name} (${i + 1}/${presets.length})...`, progress);
                 
+                preset.params.color_tint = this.selectedColorTint;
                 const preview = await this.processWithParams(preset.params);
                 this.displayProcessedImage(preset.imageId, preview);
+                this.processedImages[preset.name] = true;
                 
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
@@ -510,38 +556,25 @@ class DungeonSynthApp {
             return;
         }
 
-        if (presetName === 'custom' && !this.customProcessingReady) {
-            this.showStatus('Custom processing not ready. Please wait for processing to complete.', 'error');
-            return;
-        }
-
         try {
-            this.showStatus('Preparing high-resolution download...', 'info');
-            this.showProcessingStatus(true, 'Generating full-resolution image...', 25);
+            this.showStatus('Preparing download...', 'info');
+            this.showProcessingStatus(true, 'Generating download...', 25);
             
+            // Build URL with current parameters
+            let url = `/download/${presetName}/${this.currentFilename}?tint=${this.selectedColorTint}`;
+            
+            // For custom preset, add all current slider values
             if (presetName === 'custom') {
                 const params = this.getCurrentParams();
-                params.method = 'custom';
-                
-                this.showProcessingStatus(true, 'Updating custom parameters...', 50);
-                
-                await fetch('/process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        filename: this.currentFilename,
-                        ...params
-                    })
-                });
-                
-                await new Promise(resolve => setTimeout(resolve, 500));
+                url += `&contrast=${params.contrast}`;
+                url += `&brightness=${params.brightness}`;
+                url += `&threshold=${params.threshold}`;
+                url += `&noise=${params.noise}`;
+                url += `&blur=${params.blur}`;
             }
             
             this.showProcessingStatus(true, 'Downloading image...', 75);
             
-            const url = `/download/${presetName}/${this.currentFilename}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -555,7 +588,8 @@ class DungeonSynthApp {
             
             const a = document.createElement('a');
             a.href = downloadUrl;
-            a.download = `dungeon_synth_${presetName}.png`;
+            const tintSuffix = this.selectedColorTint !== 'none' ? `_${this.selectedColorTint}` : '';
+            a.download = `dungeon_synth_${presetName}${tintSuffix}.png`;
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
@@ -585,19 +619,17 @@ class DungeonSynthApp {
         const thresholdSlider = document.getElementById('threshold');
         const noiseSlider = document.getElementById('noise');
         const blurSlider = document.getElementById('blur');
-        const colorTintSelect = document.getElementById('colorTint');
         
         if (contrastSlider) contrastSlider.value = 1.5;
         if (brightnessSlider) brightnessSlider.value = 0;
         if (thresholdSlider) thresholdSlider.value = 128;
         if (noiseSlider) noiseSlider.value = 20;
         if (blurSlider) blurSlider.value = 0;
-        if (colorTintSelect) colorTintSelect.value = 'none';
         
         this.updateSliderDisplays();
-        this.updateColorPreview();
-        this.customProcessingReady = false;
-        this.updateCustomDownloadStatus();
+        
+        // Reset color tint
+        this.selectColorTint('none');
         
         if (!this.isProcessing) {
             this.debounceCustomProcess();
@@ -641,6 +673,12 @@ function downloadProcessed(presetName) {
 // Initialize app when page loads
 document.addEventListener('DOMContentLoaded', function() {
     app = new DungeonSynthApp();
+    
+    // Set initial color tint selection
+    const noneSwatch = document.querySelector('.color-swatch[data-tint="none"]');
+    if (noneSwatch) {
+        noneSwatch.classList.add('selected');
+    }
     
     // Cleanup on page unload
     window.addEventListener('beforeunload', function() {

@@ -140,21 +140,13 @@ button.active {
 }
 
 .preset-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
     margin-bottom: 20px;
-    justify-content: center;
 }
 
-.preset-buttons button {
-    background: #2a2a2a;
-    border-color: #555;
-    min-width: 140px;
-}
-
-.preset-buttons button:hover:not(:disabled) {
-    background: #3a3a3a;
+.preset-buttons h3 {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 15px;
 }
 
 .image-grid {
@@ -350,6 +342,199 @@ button.active {
     animation: fadeIn 0.5s ease-in;
 }
 
+/* COLOR TINTING PALETTE STYLES */
+.color-tinting-section {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #444;
+    margin: 20px 0;
+}
+
+.color-tinting-section h3 {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.color-hint {
+    text-align: center;
+    color: #999;
+    font-size: 0.9em;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.color-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.color-swatch {
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+}
+
+.color-swatch:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.color-swatch.selected {
+    border-color: #8B4513;
+    background: rgba(139, 69, 19, 0.2);
+    transform: scale(1.05);
+}
+
+.color-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    margin: 0 auto 8px;
+    border: 3px solid #555;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.color-box.no-tint {
+    background: linear-gradient(45deg, #222 25%, #333 25%, #333 50%, #222 50%, #222 75%, #333 75%, #333);
+    background-size: 20px 20px;
+}
+
+.color-swatch:hover .color-box {
+    border-color: #777;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.color-swatch.selected .color-box {
+    border-color: #DEB887;
+    box-shadow: 0 0 20px rgba(222, 184, 135, 0.5);
+}
+
+.checkmark {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 36px;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    font-weight: bold;
+}
+
+.color-swatch.selected .checkmark {
+    display: block;
+}
+
+.color-name {
+    font-size: 12px;
+    color: #ccc;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.color-swatch.selected .color-name {
+    color: #DEB887;
+}
+
+/* Preset grid layout for better organization */
+.preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.preset-grid button {
+    padding: 10px 15px;
+    border: 2px solid #666;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+    color: #e0e0e0;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.preset-grid button:hover {
+    border-color: #8B4513;
+    background: linear-gradient(135deg, #3a3a3a, #2a2a2a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced custom container styling */
+.custom-container {
+    grid-column: 1 / -1;
+    margin-bottom: 20px;
+    background: #1a1a1a;
+    border: 2px solid #444;
+}
+
+.custom-controls {
+    background: #222;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+
+.custom-controls .control-group {
+    margin-bottom: 12px;
+}
+
+.custom-controls label {
+    font-size: 14px;
+    color: #ddd;
+}
+
+.custom-controls input[type="range"] {
+    margin-bottom: 8px;
+}
+
+/* Progress bar styles */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #444, #666);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+/* Custom download button states */
+.download-btn.ready {
+    background: #2a5a2a !important;
+    color: #90ee90 !important;
+}
+
+.download-btn.processing {
+    background: #5a5a2a !important;
+    color: #fff !important;
+    cursor: not-allowed !important;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .container {
@@ -365,14 +550,33 @@ button.active {
         padding: 15px;
     }
     
-    .preset-buttons {
-        justify-content: center;
+    .preset-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 8px;
     }
     
-    .preset-buttons button {
+    .preset-grid button {
         min-width: 120px;
         font-size: 12px;
         padding: 10px 15px;
+    }
+    
+    .color-palette {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    
+    .color-box {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .checkmark {
+        font-size: 28px;
+    }
+    
+    .color-name {
+        font-size: 11px;
     }
     
     .image-grid {
@@ -381,6 +585,10 @@ button.active {
     }
     
     .original-container {
+        grid-column: 1;
+    }
+    
+    .custom-container {
         grid-column: 1;
     }
     
@@ -406,10 +614,27 @@ button.active {
         font-size: 1.8em;
     }
     
-    .preset-buttons button {
+    .preset-grid button {
         min-width: 100px;
         font-size: 11px;
         padding: 8px 12px;
+    }
+    
+    .color-palette {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .color-box {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .checkmark {
+        font-size: 24px;
+    }
+    
+    .color-name {
+        font-size: 10px;
     }
     
     .controls {
@@ -458,110 +683,6 @@ img {
     image-rendering: crisp-edges;
 }
 
-/* Progress bar styles */
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background: #333;
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 10px 0;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #444, #666);
-    width: 0%;
-    transition: width 0.3s ease;
-    border-radius: 4px;
-}
-
-/* Custom download button states */
-.download-btn.ready {
-    background: #2a5a2a !important;
-    color: #90ee90 !important;
-}
-
-.download-btn.processing {
-    background: #5a5a2a !important;
-    color: #fff !important;
-    cursor: not-allowed !important;
-}
-
-/* New atmospheric preset buttons */
-.atmospheric-btn {
-    background: linear-gradient(135deg, #2a2a2a, #3a3a3a) !important;
-    border-color: #666 !important;
-    font-size: 13px !important;
-    min-width: 140px !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-.atmospheric-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #3a3a3a, #4a4a4a) !important;
-    border-color: #777 !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
-}
-
-.atmospheric-btn::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.5s;
-}
-
-.atmospheric-btn:hover::after {
-    left: 100%;
-}
-
-/* Custom container styling */
-.custom-container {
-    grid-column: 1 / -1;
-    margin-bottom: 20px;
-    background: #1a1a1a;
-    border: 2px solid #444;
-}
-
-.custom-controls {
-    background: #222;
-    padding: 15px;
-    margin: 15px 0;
-    border-radius: 6px;
-    border: 1px solid #333;
-}
-
-.custom-controls .control-group {
-    margin-bottom: 12px;
-}
-
-.custom-controls label {
-    font-size: 14px;
-    color: #ddd;
-}
-
-.custom-controls input[type="range"] {
-    margin-bottom: 8px;
-}
-
-/* New preset button styling */
-.new-preset {
-    background: linear-gradient(135deg, #2a4a2a, #3a5a3a) !important;
-    border-color: #4a6a4a !important;
-    color: #cfc !important;
-}
-
-.new-preset:hover:not(:disabled) {
-    background: linear-gradient(135deg, #3a5a3a, #4a6a4a) !important;
-    border-color: #5a7a5a !important;
-    transform: translateY(-1px) !important;
-}
-
 /* Grid layout adjustments */
 @media (min-width: 1200px) {
     .image-grid {
@@ -581,99 +702,6 @@ img {
     .custom-container {
         grid-column: 1 / -1;
     }
-}
-
-/* Add these styles to your existing style.css file */
-
-/* Color tinting controls */
-.color-tint-group {
-    background: rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    border-radius: 8px;
-    border: 2px solid #444;
-    margin-top: 10px;
-}
-
-.color-tint-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #e0e0e0;
-}
-
-.color-tint-group select {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #666;
-    border-radius: 4px;
-    background: #2a2a2a;
-    color: #e0e0e0;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.color-tint-group select:focus {
-    border-color: #8B4513;
-    outline: none;
-    box-shadow: 0 0 5px rgba(139, 69, 19, 0.5);
-}
-
-.color-preview {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 2px solid #666;
-    display: none;
-    margin-top: 5px;
-}
-
-/* Preset grid layout for better organization */
-.preset-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.preset-grid button {
-    padding: 10px 15px;
-    border: 2px solid #666;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
-    color: #e0e0e0;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.preset-grid button:hover {
-    border-color: #8B4513;
-    background: linear-gradient(135deg, #3a3a3a, #2a2a2a);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.preset-grid button.new-preset {
-    border-color: #4B0082;
-    background: linear-gradient(135deg, #2a1a3a, #1a0a2a);
-}
-
-.preset-grid button.new-preset:hover {
-    border-color: #6A0DAD;
-    background: linear-gradient(135deg, #3a2a4a, #2a1a3a);
-}
-
-/* Enhanced custom container styling */
-.custom-container {
-    border: 3px solid #8B4513;
-    background: linear-gradient(135deg, #2a2418, #1a1810);
-}
-
-.custom-container h3 {
-    color: #DEB887;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 /* Download button enhancements */
@@ -704,21 +732,3 @@ img {
     font-style: italic;
     line-height: 1.3;
 }
-
-/* Responsive improvements for mobile */
-@media (max-width: 768px) {
-    .preset-grid {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 8px;
-    }
-    
-    .preset-grid button {
-        padding: 8px 10px;
-        font-size: 12px;
-    }
-    
-    .color-tint-group {
-        padding: 10px;
-    }
-}
-

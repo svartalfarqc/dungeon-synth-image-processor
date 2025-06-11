@@ -28,10 +28,72 @@
                     <button onclick="applyPreset('cavernDeep')">🕳️ Cavern Deep</button>
                     <button onclick="applyPreset('frozenWastes')">❄️ Frozen Wastes</button>
                     <button onclick="applyPreset('darkRitual')">🔮 Dark Ritual</button>
-                    <button onclick="applyPreset('lithographic')" class="new-preset">🖨️ Lithographic Codex</button>
-                    <button onclick="applyPreset('sepiaNostalgia')" class="new-preset">📸 Sepia Nostalgia</button>
-                    <button onclick="applyPreset('comfyHearth')" class="new-preset">🏠 Comfy Hearth</button>
-                    <button onclick="applyPreset('forestMystic')" class="new-preset">🌲 Forest Mystic</button>
+                    <button onclick="applyPreset('lithographic')">🖨️ Lithographic Codex</button>
+                    <button onclick="applyPreset('sepiaNostalgia')">📸 Sepia Nostalgia</button>
+                    <button onclick="applyPreset('comfyHearth')">🏠 Comfy Hearth</button>
+                    <button onclick="applyPreset('forestMystic')">🌲 Forest Mystic</button>
+                </div>
+            </div>
+            
+            <!-- COLOR TINTING PALETTE -->
+            <div class="color-tinting-section">
+                <h3>🎨 Color Tinting Palette</h3>
+                <p class="color-hint">Select a color tint to apply to any processed image</p>
+                <div class="color-palette">
+                    <div class="color-swatch" data-tint="none" title="No Tinting">
+                        <div class="color-box no-tint">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">None</span>
+                    </div>
+                    <div class="color-swatch" data-tint="sepia" title="Sepia Warmth">
+                        <div class="color-box" style="background-color: #8B4513;">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">Sepia Warmth</span>
+                    </div>
+                    <div class="color-swatch" data-tint="sickly_green" title="Sickly Green">
+                        <div class="color-box" style="background-color: #556B2F;">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">Sickly Green</span>
+                    </div>
+                    <div class="color-swatch" data-tint="archaic_grey" title="Archaic Grey">
+                        <div class="color-box" style="background-color: #708090;">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">Archaic Grey</span>
+                    </div>
+                    <div class="color-swatch" data-tint="winter_frost" title="Winter Frost">
+                        <div class="color-box" style="background-color: #4682B4;">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">Winter Frost</span>
+                    </div>
+                    <div class="color-swatch" data-tint="comfy_earth" title="Comfy Earth">
+                        <div class="color-box" style="background-color: #DEB887;">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">Comfy Earth</span>
+                    </div>
+                    <div class="color-swatch" data-tint="blood_ritual" title="Blood Ritual">
+                        <div class="color-box" style="background-color: #800020;">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">Blood Ritual</span>
+                    </div>
+                    <div class="color-swatch" data-tint="parchment_age" title="Parchment Age">
+                        <div class="color-box" style="background-color: #F0E68C;">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">Parchment Age</span>
+                    </div>
+                    <div class="color-swatch" data-tint="deep_purple" title="Deep Purple">
+                        <div class="color-box" style="background-color: #4B0082;">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <span class="color-name">Deep Purple</span>
+                    </div>
                 </div>
             </div>
             
@@ -55,7 +117,7 @@
                 <div class="image-info" id="imageInfo" style="display: none;"></div>
             </div>
             
-            <!-- CUSTOM PROCESSING SECTION WITH SLIDERS AND COLOR TINTING -->
+            <!-- CUSTOM PROCESSING SECTION WITH SLIDERS -->
             <div class="image-container custom-container">
                 <h3>Custom Processing</h3>
                 <div class="image-wrapper">
@@ -92,30 +154,13 @@
                         <label for="blur">Atmospheric Blur: <span id="blurValue">0</span></label>
                         <input type="range" id="blur" min="0" max="5" step="0.5" value="0">
                     </div>
-                    
-                    <!-- COLOR TINTING CONTROL -->
-                    <div class="control-group color-tint-group">
-                        <label for="colorTint">Color Tinting:</label>
-                        <select id="colorTint">
-                            <option value="none">No Tinting</option>
-                            <option value="sepia">Sepia Warmth</option>
-                            <option value="sickly_green">Sickly Green</option>
-                            <option value="archaic_grey">Archaic Grey</option>
-                            <option value="winter_frost">Winter Frost</option>
-                            <option value="comfy_earth">Comfy Earth</option>
-                            <option value="blood_ritual">Blood Ritual</option>
-                            <option value="parchment_age">Parchment Age</option>
-                            <option value="deep_purple">Deep Purple</option>
-                        </select>
-                        <div class="color-preview" id="colorPreview"></div>
-                    </div>
                 </div>
                 
                 <button class="download-btn" onclick="downloadProcessed('custom')" disabled>Download Custom</button>
-                <div class="effect-info">Live preview with current settings and optional color tinting</div>
+                <div class="effect-info">Live preview with current settings and selected color tinting</div>
             </div>
             
-            <!-- PRESET IMAGES - UPDATED WITH NEW PRESETS -->
+            <!-- PRESET IMAGES -->
             <div class="image-container">
                 <h3>Medieval Manuscript</h3>
                 <div class="image-wrapper">
@@ -220,7 +265,6 @@
                 <div class="effect-info">Heavy grain with dramatic shadows</div>
             </div>
             
-            <!-- NEW RESEARCH-BASED PRESETS -->
             <div class="image-container">
                 <h3>Lithographic Codex</h3>
                 <div class="image-wrapper">
