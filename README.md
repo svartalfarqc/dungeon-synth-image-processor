@@ -1,7 +1,7 @@
 # 🏰 Dungeon Synth Image Processor
 
 A local Python web application for transforming images into dungeon synth album cover aesthetics. Features high-contrast black and white processing, multiple presets, and full-resolution downloads.
-Made with Claude (Anthropic)
+Made with Claude (Anthropic).
 
 ## Features
 
