@@ -246,7 +246,7 @@ def process_image():
 
 @app.route('/download/<preset_name>/<filename>')
 def download_processed(preset_name, filename):
-    """Download the exact 400x400 processed preview image"""
+    """Download processed image at specified size (default 400x400)"""
     try:
         # Validate preset name
         if preset_name not in PROCESSING_PRESETS and preset_name != 'custom':
@@ -256,14 +256,52 @@ def download_processed(preset_name, filename):
         if not os.path.exists(filepath):
             return jsonify({'error': 'Original file not found'}), 404
         
-        # Get the current color tint from request
+        # Get the current color tint and size from request
         data = request.args
         color_tint = data.get('tint', 'none')
+        size = int(data.get('size', '400'))
         
         # Create cache key to find the exact processed version
         cache_key = f"{preset_name}_{color_tint}"
         
-        # Check if we have this exact version cached
+        # For sizes other than 400, we need to reprocess at target resolution
+        if size != 400:
+            logger.info(f"Processing for download: {preset_name} at {size}x{size} with tint {color_tint}")
+            
+            # Get parameters for this preset
+            if preset_name == 'custom':
+                # For custom, we need to get the current slider values from the request
+                params = {
+                    'contrast': float(data.get('contrast', 1.5)),
+                    'brightness': int(data.get('brightness', 0)),
+                    'threshold': int(data.get('threshold', 128)),
+                    'noise': int(data.get('noise', 20)),
+                    'blur': float(data.get('blur', 0)),
+                    'method': 'custom',
+                    'color_tint': color_tint
+                }
+            else:
+                # For presets, use the preset parameters
+                params = PROCESSING_PRESETS[preset_name].copy()
+                params['color_tint'] = color_tint
+            
+            # Process at target size
+            processed_path = processor.process_at_size(filepath, params, size)
+            
+            # Create filename with color tint if applied
+            tint_suffix = f'_{color_tint}' if color_tint != 'none' else ''
+            download_name = f'dungeon_synth_{preset_name}{tint_suffix}_{size}x{size}.png'
+            
+            logger.info(f"Download started: {preset_name} - {filename} with tint {color_tint} ({size}x{size})")
+            
+            return send_file(
+                processed_path,
+                as_attachment=True,
+                download_name=download_name,
+                mimetype='image/png'
+            )
+        
+        # For 400x400, use existing cache logic
         if filename in preview_cache and cache_key in preview_cache[filename]:
             # Use the cached version - this is the exact preview shown
             processed_image = preview_cache[filename][cache_key]

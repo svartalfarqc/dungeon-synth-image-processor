@@ -560,8 +560,11 @@ class DungeonSynthApp {
             this.showStatus('Preparing download...', 'info');
             this.showProcessingStatus(true, 'Generating download...', 25);
             
+            // Get selected output size
+            const outputSize = document.getElementById('outputSize')?.value || '400';
+            
             // Build URL with current parameters
-            let url = `/download/${presetName}/${this.currentFilename}?tint=${this.selectedColorTint}`;
+            let url = `/download/${presetName}/${this.currentFilename}?tint=${this.selectedColorTint}&size=${outputSize}`;
             
             // For custom preset, add all current slider values
             if (presetName === 'custom') {
@@ -589,7 +592,8 @@ class DungeonSynthApp {
             const a = document.createElement('a');
             a.href = downloadUrl;
             const tintSuffix = this.selectedColorTint !== 'none' ? `_${this.selectedColorTint}` : '';
-            a.download = `dungeon_synth_${presetName}${tintSuffix}.png`;
+            const sizeSuffix = outputSize === '400' ? '_400x400' : `_${outputSize}x${outputSize}`;
+            a.download = `dungeon_synth_${presetName}${tintSuffix}${sizeSuffix}.png`;
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();

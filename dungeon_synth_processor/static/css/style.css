@@ -448,6 +448,33 @@ button.active {
     color: #DEB887;
 }
 
+/* OUTPUT SIZE SELECTOR */
+.output-size-section {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.output-size-section h3 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.size-dropdown {
+    background: #333;
+    color: #fff;
+    border: 1px solid #666;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.size-dropdown:hover {
+    background: #444;
+}
+
 /* Preset grid layout for better organization */
 .preset-grid {
     display: grid;

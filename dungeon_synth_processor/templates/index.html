@@ -97,11 +97,21 @@
                 </div>
             </div>
             
+            <!-- OUTPUT SIZE SELECTOR -->
+            <div class="output-size-section">
+                <h3>📐 Download Size</h3>
+                <select id="outputSize" class="size-dropdown">
+                    <option value="400" selected>400x400 - Default</option>
+                    <option value="1400">1400x1400 - Bandcamp</option>
+                    <option value="2000">2000x2000 - High Quality</option>
+                    <option value="3000">3000x3000 - Ultra HD</option>
+                </select>
+            </div>
+            
             <div class="action-buttons">
                 <button onclick="processAllPresets()" id="processAllBtn" disabled>Generate All Variations</button>
                 <button onclick="resetToOriginal()" id="resetBtn" disabled>Reset to Original</button>
             </div>
-        </div>
         
         <div class="image-grid">
             <div class="image-container original-container">

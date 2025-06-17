@@ -260,7 +260,14 @@ class DungeonSynthProcessor:
     
     def _apply_processing_to_preview(self, preview_image, params):
         """Apply processing specifically tuned for 400x400 preview"""
-        return self._apply_dungeon_synth_processing(preview_image, params, is_preview=True)
+        processed = self._apply_dungeon_synth_processing(preview_image, params, is_preview=True)
+        
+        # Apply color tinting if specified
+        color_tint = params.get('color_tint', 'none')
+        if color_tint and color_tint != 'none':
+            processed = self._apply_color_tint(processed, color_tint)
+        
+        return processed
     
     def _apply_processing_to_image(self, image, params):
         """Apply processing to any size image with scaling adjustments"""
@@ -444,6 +451,55 @@ class DungeonSynthProcessor:
         
         return np.clip(gray + noise_array, 0, 255)
 
+    def process_at_size(self, filepath, params, target_size):
+        """Process image at specific target size"""
+        try:
+            img = Image.open(filepath)
+            img.load()
+            
+            # Fix orientation from EXIF data
+            img = ImageOps.exif_transpose(img)
+            
+            # Ensure proper color mode
+            if img.mode not in ('RGB', 'L'):
+                if img.mode == 'RGBA':
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    background.paste(img, mask=img.split()[-1])
+                    img = background
+                else:
+                    img = img.convert('RGB')
+            
+            # Create square crop
+            width, height = img.size
+            size = min(width, height)
+            sx = (width - size) // 2
+            sy = (height - size) // 2
+            
+            # Crop to square
+            cropped = img.crop((sx, sy, sx + size, sy + size))
+            
+            # Resize to target size
+            resized = cropped.resize((target_size, target_size), Image.Resampling.LANCZOS)
+            
+            img.close()
+            
+            # Apply processing at target size
+            processed = self._apply_dungeon_synth_processing(resized, params, is_preview=False)
+            
+            # Apply color tinting if specified
+            color_tint = params.get('color_tint', 'none')
+            if color_tint and color_tint != 'none':
+                processed = self._apply_color_tint(processed, color_tint)
+            
+            # Save to temporary file
+            output_path = os.path.join(self.temp_dir, f"processed_{target_size}_{os.path.basename(filepath)}.png")
+            processed.save(output_path, 'PNG', quality=100, optimize=True)
+            
+            return output_path
+            
+        except Exception as e:
+            raise Exception(f"Error processing at size: {str(e)}")
+        
     def cleanup(self):
         """Clean up temporary files and cache"""
         try:
