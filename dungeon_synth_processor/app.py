@@ -207,12 +207,12 @@ def process_image():
         
         # Process with validated parameters
         params = {
-            'contrast': contrast,
-            'brightness': brightness,
-            'threshold': threshold,
-            'noise': noise,
-            'blur': blur,
-            'method': method,
+            'contrast': float(data.get('contrast', 1.5)),
+            'brightness': int(data.get('brightness', 0)),
+            'threshold': int(data.get('threshold', 128)),
+            'noise': int(data.get('noise', 20)),
+            'blur': float(data.get('blur', 0)),
+            'method': data.get('method', 'custom'),
             'color_tint': color_tint
         }
         
