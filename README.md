@@ -1,276 +1,307 @@
 # 🏰 Dungeon Synth Image Processor
 
-A local Python web application for transforming images into dungeon synth album cover aesthetics. Features high-contrast black and white processing, multiple presets, and full-resolution downloads.
-Made with Claude (Anthropic).
+Transform any image into authentic dungeon synth album cover aesthetics with this powerful local web application. Features 12 unique presets, 9 color tinting options, and full customization controls.
 
-## Features
+![Dungeon Synth Processor Banner](https://github.com/yourusername/dungeon-synth-processor/assets/banner.png)
 
-- **Multiple Processing Presets**: High Contrast, Atmospheric, Silhouette, Medieval Manuscript, Ghostly Apparition
-- **Real-time Preview**: Live preview with adjustable parameters
-- **Full Resolution Processing**: Downloads maintain original image quality
-- **Multiple Input Formats**: Supports JPG, PNG, TIFF, BMP, WebP
-- **Local Execution**: No internet connection required
-- **Responsive Design**: Works on desktop and mobile
+## ✨ Key Features
 
-## Quick Start
+- **12 Authentic Presets** - From Medieval Manuscript to Forest Mystic
+- **9 Color Tinting Palettes** - Add atmospheric color overlays to any processed image
+- **Live Preview** - See changes instantly as you adjust parameters
+- **Multiple Export Sizes** - 400x400 to 3000x3000 resolution
+- **Batch Processing** - Generate all variations with one click
+- **No Internet Required** - Runs entirely on your local machine
 
-### 1. Prerequisites
-- Python 3.7 or higher
-- pip (Python package installer)
+## 🚀 Quick Start
 
-### 2. Installation
+### Installation (3 minutes)
 
+1. **Install Python** (3.7 or higher) - [Download Python](https://www.python.org/downloads/)
+
+2. **Download & Setup**
 ```bash
-# Clone or download the project files
-# Navigate to the project directory
-cd dungeon_synth_processor
+# Clone the repository
+git clone https://github.com/yourusername/dungeon-synth-processor.git
+cd dungeon-synth-processor
 
 # Create virtual environment
 python -m venv venv
 
 # Activate virtual environment
-# On Windows:
+# Windows:
 venv\Scripts\activate
-# On macOS/Linux:
+# Mac/Linux:
 source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Run the Application
-
+3. **Run the Application**
 ```bash
 python app.py
 ```
 
-### 4. Open in Browser
-Navigate to: `http://localhost:5000`
+4. **Open in Browser**
+Navigate to: http://localhost:5000
 
-## Project Structure
+## 🎨 User Interface Guide
 
-```
-dungeon_synth_processor/
-├── app.py                 # Flask application
-├── image_processor.py     # Core processing logic
-├── presets.py            # Processing presets
-├── requirements.txt      # Dependencies
-├── static/
-│   ├── css/
-│   │   └── style.css     # Styling
-│   ├── js/
-│   │   └── main.js       # Frontend JavaScript
-│   └── uploads/          # Temporary storage
-├── templates/
-│   └── index.html        # Main template
-└── README.md            # This file
-```
+### Main Interface
+![Main Interface](https://github.com/yourusername/dungeon-synth-processor/assets/main-interface.png)
 
-## Usage
+The interface is divided into four main sections:
 
-1. **Upload Image**: Click "Upload Image" and select your photo
-2. **Choose Preset**: Click any preset button for instant processing
-3. **Custom Adjustments**: Use sliders for fine-tuning
-4. **Download**: Click download buttons for full-resolution images
+### 1. Upload Section
+- Drag & drop or click to upload images
+- Supports: JPG, PNG, TIFF, BMP, WebP
+- Maximum file size: 32MB
 
-## Supported Image Formats
+### 2. Preset Selection
+![Preset Buttons](https://github.com/yourusername/dungeon-synth-processor/assets/presets.png)
 
-- **JPEG/JPG**: Standard photo format
-- **PNG**: Lossless with transparency support
-- **TIFF/TIF**: High-quality format
-- **BMP**: Bitmap format
-- **WebP**: Modern web format
+Click any preset button to instantly apply that aesthetic:
 
-## Processing Methods
+| Preset | Icon | Description |
+|--------|------|-------------|
+| **Medieval Manuscript** | 📜 | Aged parchment with authentic manuscript textures |
+| **Clean Threshold** | 🔳 | Pure black & white binary processing |
+| **Atmospheric Depths** | 🌫️ | Misty, ethereal dungeon atmospheres |
+| **Silhouette** | 👤 | Stark silhouettes on light backgrounds |
+| **Ghostly Apparition** | 👻 | Supernatural blur with lifted shadows |
+| **Cavern Deep** | 🕳️ | Deep underground tunnel aesthetics |
+| **Frozen Wastes** | ❄️ | Crystalline winter synth processing |
+| **Dark Ritual** | 🔮 | Heavy grain for occult atmospheres |
+| **Lithographic Codex** | 🖨️ | Historical printmaking simulation |
+| **Sepia Nostalgia** | 📸 | Vintage film degradation effects |
+| **Comfy Hearth** | 🏠 | Warm, inviting domestic atmospheres |
+| **Forest Mystic** | 🌲 | Organic textures with natural depth |
 
-### High Contrast Threshold
-- Pure black & white conversion
-- Dramatic contrast enhancement
-- Perfect for stark silhouettes
+### 3. Color Tinting Palette
+![Color Tinting](https://github.com/yourusername/dungeon-synth-processor/assets/color-tinting.png)
 
-### Atmospheric
-- Subtle blur effect
-- Enhanced contrast with detail preservation
-- Mysterious, ethereal atmosphere
+Apply atmospheric color overlays to any processed image:
 
-### Silhouette
-- Extreme threshold processing
-- Creates stark silhouettes
-- Light backgrounds with dark subjects
+- **None** - Pure black & white processing
+- **Sepia Warmth** - Classic aged photograph tones
+- **Sickly Green** - Eerie, supernatural atmosphere
+- **Archaic Grey** - Ancient stone textures
+- **Winter Frost** - Cold, crystalline blues
+- **Comfy Earth** - Warm, natural browns
+- **Blood Ritual** - Deep, ominous reds
+- **Parchment Age** - Yellowed manuscript tones
+- **Deep Purple** - Mystical, arcane atmosphere
 
-### Medieval Manuscript
-- Aged parchment aesthetic
-- Heavy grain texture
-- Historical, ancient feel
+### 4. Custom Processing Controls
+![Custom Controls](https://github.com/yourusername/dungeon-synth-processor/assets/custom-controls.png)
 
-### Ghostly Apparition
-- Ethereal blur processing
-- Bright midtones
-- Supernatural atmosphere
+Fine-tune your processing with live preview:
 
-### Cavern Deep
-- Deep shadows and mysterious tunnels
-- Enhanced darkness for underground aesthetics
+| Control | Range | Description |
+|---------|-------|-------------|
+| **Contrast** | 0.5 - 3.0 | Intensity of light/dark separation |
+| **Brightness** | -100 to +100 | Overall image lightness |
+| **Threshold** | 0 - 255 | Binary conversion point |
+| **Grain/Noise** | 0 - 50 | Texture and grain amount |
+| **Atmospheric Blur** | 0 - 5 | Ethereal fog effect |
 
-### Frozen Wastes
-- Stark, minimalist winter landscapes
-- High contrast for icy effects
+### 5. Download Options
+![Download Options](https://github.com/yourusername/dungeon-synth-processor/assets/download-options.png)
 
-### Dark Ritual
-- Dramatic contrast for ritual atmospheres
-- Heavy grain and atmospheric processing
+Select your output size:
+- **400x400** - Default web size
+- **1400x1400** - Bandcamp standard
+- **2000x2000** - High quality
+- **3000x3000** - Ultra HD
 
-### Custom Processing
-- Adjustable contrast, brightness, threshold
-- Variable noise/grain levels
-- Customizable blur effects
+## 📖 Workflow Examples
 
-## Technical Details
+### Basic Workflow
+1. Upload your image
+2. Click a preset (e.g., "Medieval Manuscript")
+3. Select a color tint (e.g., "Parchment Age")
+4. Download your processed image
 
-### Parameters
-- **Contrast**: 0.5 - 3.0 (1.5 default)
-- **Brightness**: -100 to +100 (0 default)
-- **Threshold**: 0 - 255 (128 default)
-- **Noise**: 0 - 50 (20 default)
-- **Blur**: 0 - 5 pixels (0 default)
+### Advanced Workflow
+1. Upload your image
+2. Click "Generate All Variations" to see all presets
+3. Select your favorite preset
+4. Fine-tune with custom controls
+5. Apply color tinting
+6. Choose output size
+7. Download final image
+
+### Batch Processing
+1. Upload your image
+2. Click "Generate All Variations"
+3. Download each variation individually
+4. Perfect for comparing different aesthetics
+
+## 🔧 Technical Details
 
 ### Processing Pipeline
-1. Image upload and validation
-2. Square crop for preview (maintains aspect ratio)
-3. Blur application (if enabled)
-4. Grayscale conversion (luminosity method)
-5. Brightness adjustment
-6. Contrast enhancement
-7. Method-specific processing
-8. Noise/grain addition
-9. Final output generation
-
-## VSCode Setup
-
-### Recommended Extensions
-- Python (Microsoft)
-- Flask Snippets
-- HTML CSS Support
-- Prettier - Code formatter
-
-### Debug Configuration
-Create `.vscode/launch.json`:
-
-```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Flask App",
-            "type": "python",
-            "request": "launch",
-            "program": "app.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "env": {
-                "FLASK_ENV": "development",
-                "FLASK_DEBUG": "1"
-            }
-        }
-    ]
-}
+```
+Input Image → Square Crop → Blur (optional) → Grayscale Conversion
+→ Brightness Adjustment → Contrast Enhancement → Method Processing
+→ Noise Addition → Color Tinting → Output
 ```
 
-## Customization
+### Processing Methods
 
-### Adding New Presets
-Edit `presets.py` to add new processing methods:
+Each preset uses a unique processing algorithm:
 
-```python
-'newPreset': {
-    'contrast': 2.0,
-    'brightness': 5,
-    'threshold': 110,
-    'noise': 15,
-    'blur': 1.0,
-    'method': 'custom',
-    'name': 'New Preset',
-    'description': 'Description of effect'
-}
-```
+- **Threshold Methods**: Binary conversion at specified levels
+- **Atmospheric Methods**: Tonal compression with blur
+- **Manuscript Methods**: Aged texture simulation
+- **Crystalline Methods**: Sharp contrast with minimal grain
 
-### Custom Processing Methods
-Add new methods in `image_processor.py`:
+### Color Tinting System
 
-```python
-def _apply_method_processing(self, gray, threshold, method):
-    if method == 'your_method':
-        # Your custom processing logic
-        return processed_gray
-    # ... existing methods
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**Port Already in Use**
-```bash
-# Change port in app.py
-app.run(debug=True, host='localhost', port=5001)
-```
-
-**Missing Dependencies**
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-**Permission Errors**
-```bash
-# Ensure upload directory is writable
-chmod 755 static/uploads
-```
-
-**Large Image Processing**
-- Images over 10MB may take longer to process
-- For very large images, consider resizing before upload
-- Processing time scales with image resolution
+- **Blend Modes**: Overlay, Multiply, Soft Light
+- **Opacity Control**: 20-35% depending on tint
+- **Non-destructive**: Applied after main processing
 
 ### Performance Optimization
 
-For better performance with large images:
-1. The app automatically uses vectorized processing for images > 1MP
-2. Preview generation is optimized for 400x400 display
-3. Full-resolution processing maintains original quality
-4. Images are automatically converted to RGB during processing
+- Vectorized NumPy operations for images >1MP
+- Cached preview generation
+- Separate preview (400x400) and export pipelines
+- Automatic EXIF orientation correction
 
-## Dependencies
+## 💾 File Management
 
-- **Flask**: Web framework
-- **Pillow**: Image processing
-- **NumPy**: Numerical operations
-- **OpenCV**: Advanced image processing
-- **Werkzeug**: WSGI utilities
+### Supported Formats
+| Format | Extension | Notes |
+|--------|-----------|-------|
+| JPEG | .jpg, .jpeg | Most common format |
+| PNG | .png | Lossless, supports transparency |
+| TIFF | .tif, .tiff | Professional quality |
+| BMP | .bmp | Uncompressed bitmap |
+| WebP | .webp | Modern web format |
 
-## License
+### File Size Limits
+- Maximum upload: 32MB
+- Maximum dimensions: 20,000 x 20,000 pixels
+- Recommended: Under 10MB for best performance
 
-This project is open source. Feel free to modify and redistribute.
+## 🛠️ Customization
 
-## Contributing
+### Adding Custom Presets
 
-1. Fork the repository
-2. Create feature branch
-3. Add tests for new functionality
-4. Submit pull request
+Edit `presets.py` to add your own:
 
-## Support
+```python
+'your_preset': {
+    'contrast': 1.5,
+    'brightness': 0,
+    'threshold': 128,
+    'noise': 20,
+    'blur': 1.0,
+    'method': 'custom',
+    'name': 'Your Preset Name',
+    'description': 'Description of the effect'
+}
+```
 
-For issues or questions:
-1. Check the troubleshooting section
-2. Review the code comments
-3. Create an issue with detailed description
+### Creating Custom Color Tints
 
-## Changelog
+Add to `COLOR_TINTS` in `presets.py`:
 
-### v1.0.0
-- Clean image processing for dungeon synth aesthetics
-- Support for JPG, PNG, TIFF, BMP, WebP formats
-- Multiple processing presets
-- Real-time preview and custom adjustments
-- Full-resolution downloads
+```python
+'custom_tint': {
+    'name': 'Custom Tint',
+    'color': '#hexcode',
+    'opacity': 0.3,
+    'blend_mode': 'overlay'  # or 'multiply', 'soft_light'
+}
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**"Port 5000 already in use"**
+```bash
+# The app will automatically find a free port
+# Or manually specify: python app.py --port 5001
+```
+
+**"Module not found" errors**
+```bash
+# Ensure virtual environment is activated
+# Reinstall dependencies
+pip install -r requirements.txt
+```
+
+**Large images processing slowly**
+- Images over 10MB may take longer
+- Consider resizing before upload
+- Processing is optimized for <5000x5000
+
+**Browser compatibility**
+- Chrome/Edge: Full support
+- Firefox: Full support
+- Safari: Full support
+- Mobile browsers: Limited to smaller images
+
+## 🎯 Tips & Best Practices
+
+### For Best Results
+
+1. **Source Images**
+   - High contrast subjects work best
+   - Clear foreground/background separation
+   - Avoid overly busy compositions
+
+2. **Preset Selection**
+   - Medieval/Lithographic: Best for text and symbols
+   - Atmospheric/Ghostly: Great for landscapes
+   - Silhouette/Threshold: Perfect for stark imagery
+   - Forest/Comfy: Ideal for organic subjects
+
+3. **Color Tinting**
+   - Apply after finding your ideal black & white processing
+   - Sepia/Parchment: Historical feel
+   - Green/Purple: Supernatural atmosphere
+   - Grey/Frost: Cold, distant moods
+
+4. **Export Sizes**
+   - 400x400: Web previews, social media
+   - 1400x1400: Bandcamp, streaming platforms
+   - 2000x2000+: Physical media, prints
+
+## 📱 Mobile Usage
+
+The interface is fully responsive:
+- Upload via camera or gallery
+- All controls accessible
+- Touch-friendly sliders
+- Optimized for portrait/landscape
+
+## 🔒 Privacy & Security
+
+- **100% Local Processing** - No images uploaded to servers
+- **No Data Collection** - Complete privacy
+- **Temporary Files** - Auto-cleaned on exit
+- **Open Source** - Verify the code yourself
+
+## 🤝 Contributing
+
+Contributions welcome! Areas for improvement:
+- Additional presets
+- New color palettes
+- Performance optimizations
+- UI enhancements
+
+## 📄 License
+
+Open source - free to use and modify.
+
+## 🙏 Credits
+
+Created with Claude (Anthropic) for the dungeon synth community.
+
+---
+
+**Ready to transform your images?** Run `python app.py` and start creating!

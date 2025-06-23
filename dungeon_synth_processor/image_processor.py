@@ -1,10 +1,10 @@
+
 import numpy as np
-from PIL import Image, ImageFilter, ImageEnhance, ImageDraw, ImageOps, ImageChops
+from PIL import Image, ImageFilter, ImageOps
 import io
 import base64
 import tempfile
 import os
-import random
 import atexit
 import shutil
 from presets import get_color_tint
@@ -275,6 +275,8 @@ class DungeonSynthProcessor:
     
     def _apply_dungeon_synth_processing(self, image, params, is_preview=True):
         """Enhanced dungeon synth processing with research-based methods"""
+    def _apply_dungeon_synth_processing(self, image, params, is_preview=None):
+        """Enhanced dungeon synth processing with research-based methods"""
         try:
             if image.mode != 'RGB':
                 image = image.convert('RGB')
@@ -327,7 +329,7 @@ class DungeonSynthProcessor:
                 gray = np.where(gray > threshold, np.minimum(255, gray + 30), np.maximum(0, gray - 20))
             elif method == 'atmospheric':
                 # Tonal compression for atmospheric effect
-                gray = self._apply_tonal_compression(gray, threshold)
+                gray = self._apply_tonal_compression(gray)
             elif method == 'cavern':
                 gray = np.where(gray > threshold + 40, 255,
                                np.where(gray < threshold - 60, 0, gray * 0.3))
@@ -342,10 +344,10 @@ class DungeonSynthProcessor:
                 gray = self._apply_lithographic_effect(gray, threshold)
             elif method == 'sepia':
                 # Vintage film effect
-                gray = self._apply_vintage_film_effect(gray, threshold)
+                gray = self._apply_vintage_film_effect(gray)
             elif method == 'comfy':
                 # Warm hearth effect
-                gray = self._apply_comfy_effect(gray, threshold)
+                gray = self._apply_comfy_effect(gray)
             elif method == 'forest':
                 # Organic texture enhancement
                 gray = self._apply_forest_effect(gray, threshold)
@@ -361,8 +363,6 @@ class DungeonSynthProcessor:
             
         except Exception as e:
             raise Exception(f"Error in dungeon synth processing: {str(e)}")
-    
-    def _apply_s_curve(self, gray, contrast):
         """Apply S-curve for gentle contrast enhancement"""
         # Normalize to 0-1
         normalized = gray / 255.0
@@ -380,11 +380,11 @@ class DungeonSynthProcessor:
     
     def _apply_tonal_compression(self, gray, threshold):
         """Atmospheric tonal compression"""
+    def _apply_tonal_compression(self, gray):
+        """Atmospheric tonal compression"""
         # Compress dynamic range while preserving detail
         compressed = gray * 0.7 + 40  # Lift shadows, compress highlights
         return np.clip(compressed, 0, 255)
-    
-    def _apply_crystalline_effect(self, gray, threshold):
         """Winter synth crystalline processing"""
         # Sharp, clean transitions with enhanced highlights
         return np.where(gray > threshold, 
@@ -399,17 +399,17 @@ class DungeonSynthProcessor:
     
     def _apply_vintage_film_effect(self, gray, threshold):
         """Vintage film degradation effect"""
+    def _apply_vintage_film_effect(self, gray):
+        """Vintage film degradation effect"""
         # Lifted blacks, compressed highlights
         lifted = gray * 0.8 + 30
         return np.clip(lifted, 0, 240)  # Prevent pure whites
-    
-    def _apply_comfy_effect(self, gray, threshold):
+        """Warm comfy synth processing"""
+    def _apply_comfy_effect(self, gray):
         """Warm comfy synth processing"""
         # Gentle, low contrast with lifted shadows
         comfy = gray * 0.7 + 50
         return np.clip(comfy, 0, 255)
-    
-    def _apply_forest_effect(self, gray, threshold):
         """Forest/organic texture enhancement"""
         # Enhanced midtones for organic detail
         return np.where(gray > threshold + 30, 255,

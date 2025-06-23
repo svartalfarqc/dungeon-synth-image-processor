@@ -19,7 +19,11 @@
 # Other exclusions
 *.log
 *.tmp
+*.pyc
 **/*.pyc
+
+# pycache
+__pycache__/
 
 # Specifically ignore all files in the uploads folder
 static/uploads/
