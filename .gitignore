@@ -16,5 +16,10 @@
 **/*.bmp
 **/*.webp
 
+# Other exclusions
+*.log
+*.tmp
+**/*.pyc
+
 # Specifically ignore all files in the uploads folder
 static/uploads/

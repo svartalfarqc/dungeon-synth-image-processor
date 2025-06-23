@@ -7,6 +7,7 @@ import logging
 import signal
 import sys
 from werkzeug.utils import secure_filename
+import PIL
 from PIL import Image, ImageOps
 import io
 import base64
