@@ -1,34 +1,30 @@
 # 🏰 Dungeon Synth Image Processor
 
-Transform any image into authentic dungeon synth album cover aesthetics with this powerful local web application. Features 12 unique presets, 9 color tinting options, and full customization controls.
+Transform ordinary images into authentic dungeon synth album cover aesthetics. This local web application provides 12 carefully crafted presets, 9 atmospheric color tints, and precise manual controls for creating evocative imagery.
 
-![Dungeon Synth Processor Banner](https://github.com/yourusername/dungeon-synth-processor/assets/banner.png)
+## Features
 
-## ✨ Key Features
+- **12 Authentic Presets** - From ancient manuscript textures to crystalline winter processing
+- **9 Atmospheric Color Tints** - Deep earth tones, archaic greys, and ritual bloods
+- **Real-time Preview** - Witness transformations as parameters shift
+- **Multiple Export Resolutions** - 400x400 to 3000x3000 pixels
+- **Batch Processing** - Generate all variations simultaneously
+- **Complete Privacy** - All processing occurs locally on your machine
 
-- **12 Authentic Presets** - From Medieval Manuscript to Forest Mystic
-- **9 Color Tinting Palettes** - Add atmospheric color overlays to any processed image
-- **Live Preview** - See changes instantly as you adjust parameters
-- **Multiple Export Sizes** - 400x400 to 3000x3000 resolution
-- **Batch Processing** - Generate all variations with one click
-- **No Internet Required** - Runs entirely on your local machine
+## Installation
 
-## 🚀 Quick Start
+### Requirements
+- Python 3.7 or higher
 
-### Installation (3 minutes)
-
-1. **Install Python** (3.7 or higher) - [Download Python](https://www.python.org/downloads/)
-
-2. **Download & Setup**
+### Setup
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/dungeon-synth-processor.git
 cd dungeon-synth-processor
 
-# Create virtual environment
+# Create and activate virtual environment
 python -m venv venv
 
-# Activate virtual environment
 # Windows:
 venv\Scripts\activate
 # Mac/Linux:
@@ -38,53 +34,45 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. **Run the Application**
+### Launch
 ```bash
 python app.py
 ```
 
-4. **Open in Browser**
 Navigate to: http://localhost:5000
 
-## 🎨 User Interface Guide
+## Interface Overview
 
-### Main Interface
-![Main Interface](https://github.com/yourusername/dungeon-synth-processor/assets/main-interface.png)
+The application is organized into four primary sections:
 
-The interface is divided into four main sections:
-
-### 1. Upload Section
-- Drag & drop or click to upload images
-- Supports: JPG, PNG, TIFF, BMP, WebP
+### Upload Section
+- Supports JPG, PNG, TIFF, BMP, WebP formats
 - Maximum file size: 32MB
+- Drag and drop functionality included
 
-### 2. Preset Selection
-![Preset Buttons](https://github.com/yourusername/dungeon-synth-processor/assets/presets.png)
+### Preset Collection
 
-Click any preset button to instantly apply that aesthetic:
+| Preset | Description |
+|--------|-------------|
+| **Medieval Manuscript** | Aged parchment with authentic manuscript textures |
+| **Clean Threshold** | Pure binary black and white conversion |
+| **Atmospheric Depths** | Misty, ethereal processing for otherworldly atmospheres |
+| **Silhouette** | Stark forms against pale backgrounds |
+| **Ghostly Apparition** | Supernatural blur with lifted shadows |
+| **Cavern Deep** | Deep underground tunnel aesthetics |
+| **Frozen Wastes** | Crystalline winter processing with minimal grain |
+| **Dark Ritual** | Heavy grain for occult atmospheres |
+| **Lithographic Codex** | Historical printmaking simulation |
+| **Sepia Nostalgia** | Vintage film degradation effects |
+| **Comfy Hearth** | Warm, subdued domestic atmospheres |
+| **Forest Mystic** | Organic textures with natural depth |
 
-| Preset | Icon | Description |
-|--------|------|-------------|
-| **Medieval Manuscript** | 📜 | Aged parchment with authentic manuscript textures |
-| **Clean Threshold** | 🔳 | Pure black & white binary processing |
-| **Atmospheric Depths** | 🌫️ | Misty, ethereal dungeon atmospheres |
-| **Silhouette** | 👤 | Stark silhouettes on light backgrounds |
-| **Ghostly Apparition** | 👻 | Supernatural blur with lifted shadows |
-| **Cavern Deep** | 🕳️ | Deep underground tunnel aesthetics |
-| **Frozen Wastes** | ❄️ | Crystalline winter synth processing |
-| **Dark Ritual** | 🔮 | Heavy grain for occult atmospheres |
-| **Lithographic Codex** | 🖨️ | Historical printmaking simulation |
-| **Sepia Nostalgia** | 📸 | Vintage film degradation effects |
-| **Comfy Hearth** | 🏠 | Warm, inviting domestic atmospheres |
-| **Forest Mystic** | 🌲 | Organic textures with natural depth |
+### Color Tinting Palette
 
-### 3. Color Tinting Palette
-![Color Tinting](https://github.com/yourusername/dungeon-synth-processor/assets/color-tinting.png)
+Apply subtle atmospheric overlays to processed images:
 
-Apply atmospheric color overlays to any processed image:
-
-- **None** - Pure black & white processing
-- **Sepia Warmth** - Classic aged photograph tones
+- **None** - Pure monochromatic processing
+- **Sepia Warmth** - Aged photograph tones
 - **Sickly Green** - Eerie, supernatural atmosphere
 - **Archaic Grey** - Ancient stone textures
 - **Winter Frost** - Cold, crystalline blues
@@ -93,118 +81,98 @@ Apply atmospheric color overlays to any processed image:
 - **Parchment Age** - Yellowed manuscript tones
 - **Deep Purple** - Mystical, arcane atmosphere
 
-### 4. Custom Processing Controls
-![Custom Controls](https://github.com/yourusername/dungeon-synth-processor/assets/custom-controls.png)
+### Manual Controls
 
-Fine-tune your processing with live preview:
-
-| Control | Range | Description |
-|---------|-------|-------------|
-| **Contrast** | 0.5 - 3.0 | Intensity of light/dark separation |
-| **Brightness** | -100 to +100 | Overall image lightness |
-| **Threshold** | 0 - 255 | Binary conversion point |
-| **Grain/Noise** | 0 - 50 | Texture and grain amount |
+| Control | Range | Effect |
+|---------|-------|--------|
+| **Contrast** | 0.5 - 3.0 | Light and shadow separation intensity |
+| **Brightness** | -100 to +100 | Overall luminosity adjustment |
+| **Threshold** | 0 - 255 | Binary conversion boundary |
+| **Grain/Noise** | 0 - 50 | Texture and organic grain |
 | **Atmospheric Blur** | 0 - 5 | Ethereal fog effect |
 
-### 5. Download Options
-![Download Options](https://github.com/yourusername/dungeon-synth-processor/assets/download-options.png)
-
-Select your output size:
-- **400x400** - Default web size
+### Export Options
+- **400x400** - Standard web format
 - **1400x1400** - Bandcamp standard
-- **2000x2000** - High quality
-- **3000x3000** - Ultra HD
+- **2000x2000** - High resolution
+- **3000x3000** - Archival quality
 
-## 📖 Workflow Examples
+## Usage Workflows
 
-### Basic Workflow
-1. Upload your image
-2. Click a preset (e.g., "Medieval Manuscript")
-3. Select a color tint (e.g., "Parchment Age")
-4. Download your processed image
+### Basic Processing
+1. Upload source image
+2. Select desired preset
+3. Apply color tinting if desired
+4. Download processed result
 
-### Advanced Workflow
-1. Upload your image
-2. Click "Generate All Variations" to see all presets
-3. Select your favorite preset
-4. Fine-tune with custom controls
-5. Apply color tinting
-6. Choose output size
-7. Download final image
+### Advanced Processing
+1. Upload source image
+2. Generate all preset variations for comparison
+3. Select preferred aesthetic
+4. Fine-tune using manual controls
+5. Apply atmospheric color tinting
+6. Export at desired resolution
 
-### Batch Processing
-1. Upload your image
-2. Click "Generate All Variations"
-3. Download each variation individually
-4. Perfect for comparing different aesthetics
+### Batch Generation
+1. Upload source image
+2. Execute "Generate All Variations"
+3. Download individual presets as needed
 
-## 🔧 Technical Details
+## Technical Implementation
 
 ### Processing Pipeline
 ```
-Input Image → Square Crop → Blur (optional) → Grayscale Conversion
-→ Brightness Adjustment → Contrast Enhancement → Method Processing
-→ Noise Addition → Color Tinting → Output
+Input → Square Crop → Blur (optional) → Grayscale Conversion
+→ Brightness → Contrast → Method Processing → Noise → Color Tint → Output
 ```
 
 ### Processing Methods
-
-Each preset uses a unique processing algorithm:
-
 - **Threshold Methods**: Binary conversion at specified levels
 - **Atmospheric Methods**: Tonal compression with blur
 - **Manuscript Methods**: Aged texture simulation
 - **Crystalline Methods**: Sharp contrast with minimal grain
 
 ### Color Tinting System
-
 - **Blend Modes**: Overlay, Multiply, Soft Light
-- **Opacity Control**: 20-35% depending on tint
-- **Non-destructive**: Applied after main processing
+- **Opacity Range**: 20-35% depending on tint
+- **Non-destructive**: Applied after primary processing
 
-### Performance Optimization
-
-- Vectorized NumPy operations for images >1MP
-- Cached preview generation
-- Separate preview (400x400) and export pipelines
-- Automatic EXIF orientation correction
-
-## 💾 File Management
+## File Specifications
 
 ### Supported Formats
-| Format | Extension | Notes |
-|--------|-----------|-------|
-| JPEG | .jpg, .jpeg | Most common format |
-| PNG | .png | Lossless, supports transparency |
+| Format | Extensions | Notes |
+|--------|------------|-------|
+| JPEG | .jpg, .jpeg | Standard format |
+| PNG | .png | Lossless with transparency support |
 | TIFF | .tif, .tiff | Professional quality |
 | BMP | .bmp | Uncompressed bitmap |
 | WebP | .webp | Modern web format |
 
-### File Size Limits
+### Limitations
 - Maximum upload: 32MB
 - Maximum dimensions: 20,000 x 20,000 pixels
-- Recommended: Under 10MB for best performance
+- Optimal performance: Under 10MB
 
-## 🛠️ Customization
+## Customization
 
 ### Adding Custom Presets
 
-Edit `presets.py` to add your own:
+Modify `presets.py`:
 
 ```python
-'your_preset': {
+'custom_preset': {
     'contrast': 1.5,
     'brightness': 0,
     'threshold': 128,
     'noise': 20,
     'blur': 1.0,
     'method': 'custom',
-    'name': 'Your Preset Name',
-    'description': 'Description of the effect'
+    'name': 'Custom Preset',
+    'description': 'Description of effect'
 }
 ```
 
-### Creating Custom Color Tints
+### Creating Color Tints
 
 Add to `COLOR_TINTS` in `presets.py`:
 
@@ -213,85 +181,74 @@ Add to `COLOR_TINTS` in `presets.py`:
     'name': 'Custom Tint',
     'color': '#hexcode',
     'opacity': 0.3,
-    'blend_mode': 'overlay'  # or 'multiply', 'soft_light'
+    'blend_mode': 'overlay'
 }
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
-**"Port 5000 already in use"**
+**Port Conflicts**
 ```bash
-# The app will automatically find a free port
-# Or manually specify: python app.py --port 5001
+# Application automatically finds available port
+# Manual specification: python app.py --port 5001
 ```
 
-**"Module not found" errors**
+**Missing Dependencies**
 ```bash
-# Ensure virtual environment is activated
-# Reinstall dependencies
-pip install -r requirements.txt
+# Ensure virtual environment is active
+# Reinstall: pip install -r requirements.txt
 ```
 
-**Large images processing slowly**
-- Images over 10MB may take longer
-- Consider resizing before upload
-- Processing is optimized for <5000x5000
+**Performance with Large Images**
+- Files over 10MB require longer processing time
+- Consider resizing before upload for optimal performance
+- Processing optimized for images under 5000x5000 pixels
 
-**Browser compatibility**
-- Chrome/Edge: Full support
-- Firefox: Full support
-- Safari: Full support
-- Mobile browsers: Limited to smaller images
+### Browser Compatibility
+- Chrome/Edge: Full functionality
+- Firefox: Full functionality
+- Safari: Full functionality
+- Mobile browsers: Limited to smaller file sizes
 
-## 🎯 Tips & Best Practices
+## Recommendations
 
-### For Best Results
+### Source Material
+- High contrast subjects yield optimal results
+- Clear foreground/background separation enhances processing
+- Avoid overly complex compositions
 
-1. **Source Images**
-   - High contrast subjects work best
-   - Clear foreground/background separation
-   - Avoid overly busy compositions
+### Preset Selection
+- Medieval/Lithographic: Ideal for text and symbolic imagery
+- Atmospheric/Ghostly: Suited for landscapes and ambient scenes
+- Silhouette/Threshold: Perfect for stark, dramatic imagery
+- Forest/Comfy: Best for organic and natural subjects
 
-2. **Preset Selection**
-   - Medieval/Lithographic: Best for text and symbols
-   - Atmospheric/Ghostly: Great for landscapes
-   - Silhouette/Threshold: Perfect for stark imagery
-   - Forest/Comfy: Ideal for organic subjects
+### Color Application
+- Apply tinting after achieving desired monochromatic processing
+- Sepia/Parchment: Historical and aged aesthetics
+- Green/Purple: Supernatural and otherworldly moods
+- Grey/Frost: Cold, distant atmospheres
 
-3. **Color Tinting**
-   - Apply after finding your ideal black & white processing
-   - Sepia/Parchment: Historical feel
-   - Green/Purple: Supernatural atmosphere
-   - Grey/Frost: Cold, distant moods
+### Export Guidelines
+- 400x400: Web use and social media
+- 1400x1400: Music streaming platforms
+- 2000x2000+: Physical media and high-quality prints
 
-4. **Export Sizes**
-   - 400x400: Web previews, social media
-   - 1400x1400: Bandcamp, streaming platforms
-   - 2000x2000+: Physical media, prints
+## Privacy and Security
 
-## 📱 Mobile Usage
+- **Local Processing Only** - No external server communication
+- **No Data Collection** - Complete user privacy
+- **Automatic Cleanup** - Temporary files removed on exit
+- **Open Source** - All code available for inspection
 
-The interface is fully responsive:
-- Upload via camera or gallery
-- All controls accessible
-- Touch-friendly sliders
-- Optimized for portrait/landscape
+## License
 
-## 🔒 Privacy & Security
+Open source software - free for use and modification.
 
-- **100% Local Processing** - No images uploaded to servers
-- **No Data Collection** - Complete privacy
-- **Temporary Files** - Auto-cleaned on exit
-- **Open Source** - Verify the code yourself
-
-## 📄 License
-
-Open source - free to use and modify.
-
-## 🙏 Credits
-Luc Mercier
-Created with Claude (Anthropic) for the dungeon synth community.
+## Credits
+Luc Mercier  
+Developed with Claude (Anthropic)
 
 ---
