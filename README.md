@@ -1,4 +1,6 @@
-# 🏰 Dungeon Synth Image Processor
+### Manual Controls
+
+![Processing Interface](processing_interface_screenshot.html# 🏰 Dungeon Synth Image Processor
 
 Transform ordinary images into authentic dungeon synth album cover aesthetics. This local web application provides 12 carefully crafted presets, 9 atmospheric color tints, and precise manual controls for creating evocative imagery.
 
@@ -43,6 +45,8 @@ Navigate to: http://localhost:5000
 
 ## Interface Overview
 
+![Main Interface](main_interface_screenshot.html)
+
 The application is organized into four primary sections:
 
 ### Upload Section
@@ -51,6 +55,8 @@ The application is organized into four primary sections:
 - Drag and drop functionality included
 
 ### Preset Collection
+
+![Preset Gallery](preset_gallery_screenshot.html)
 
 | Preset | Description |
 |--------|-------------|
