@@ -286,22 +286,12 @@ The interface is fully responsive:
 - **Temporary Files** - Auto-cleaned on exit
 - **Open Source** - Verify the code yourself
 
-## 🤝 Contributing
-
-Contributions welcome! Areas for improvement:
-- Additional presets
-- New color palettes
-- Performance optimizations
-- UI enhancements
-
 ## 📄 License
 
 Open source - free to use and modify.
 
 ## 🙏 Credits
-
+Luc Mercier
 Created with Claude (Anthropic) for the dungeon synth community.
 
 ---
-
-**Ready to transform your images?** Run `python app.py` and start creating!
