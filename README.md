@@ -1,6 +1,6 @@
 ### Manual Controls
 
-![Processing Interface](processing_interface_screenshot.html# 🏰 Dungeon Synth Image Processor
+![Processing Interface](screenshots/processing-interface.png)# 🏰 Dungeon Synth Image Processor
 
 Transform ordinary images into authentic dungeon synth album cover aesthetics. This local web application provides 12 carefully crafted presets, 9 atmospheric color tints, and precise manual controls for creating evocative imagery.
 
@@ -45,7 +45,7 @@ Navigate to: http://localhost:5000
 
 ## Interface Overview
 
-![Main Interface](main_interface_screenshot.html)
+![Main Interface](screenshots/main-interface.png)
 
 The application is organized into four primary sections:
 
@@ -56,7 +56,7 @@ The application is organized into four primary sections:
 
 ### Preset Collection
 
-![Preset Gallery](preset_gallery_screenshot.html)
+![Preset Gallery](screenshots/preset-gallery.png)
 
 | Preset | Description |
 |--------|-------------|
@@ -74,6 +74,8 @@ The application is organized into four primary sections:
 | **Forest Mystic** | Organic textures with natural depth |
 
 ### Color Tinting Palette
+
+![Color Tinting](screenshots/color-tinting.png)
 
 Apply subtle atmospheric overlays to processed images:
 
@@ -98,6 +100,9 @@ Apply subtle atmospheric overlays to processed images:
 | **Atmospheric Blur** | 0 - 5 | Ethereal fog effect |
 
 ### Export Options
+
+![Download Options](screenshots/download-options.png)
+
 - **400x400** - Standard web format
 - **1400x1400** - Bandcamp standard
 - **2000x2000** - High resolution

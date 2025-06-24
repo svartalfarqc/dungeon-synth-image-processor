@@ -16,6 +16,15 @@
 **/*.bmp
 **/*.webp
 
+# But keep images in the screenshots folder
+!screenshots/*.png
+!screenshots/*.jpg
+!screenshots/*.jpeg
+!screenshots/*.tiff
+!screenshots/*.tif
+!screenshots/*.bmp
+!screenshots/*.webp
+
 # Other exclusions
 *.log
 *.tmp
