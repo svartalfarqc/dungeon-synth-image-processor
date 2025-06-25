@@ -1,4 +1,3 @@
-
 import numpy as np
 from PIL import Image, ImageFilter, ImageOps
 import io
@@ -8,6 +7,11 @@ import os
 import atexit
 import shutil
 from presets import get_color_tint
+
+# Note: OpenCV is listed in requirements.txt but not actually used in this implementation
+# If you're getting OpenCV errors, you can either:
+# 1. Remove it from requirements.txt, or
+# 2. Comment out any cv2 imports if they exist elsewhere
 
 class DungeonSynthProcessor:
     """
@@ -275,8 +279,6 @@ class DungeonSynthProcessor:
     
     def _apply_dungeon_synth_processing(self, image, params, is_preview=True):
         """Enhanced dungeon synth processing with research-based methods"""
-    def _apply_dungeon_synth_processing(self, image, params, is_preview=None):
-        """Enhanced dungeon synth processing with research-based methods"""
         try:
             if image.mode != 'RGB':
                 image = image.convert('RGB')
@@ -363,6 +365,8 @@ class DungeonSynthProcessor:
             
         except Exception as e:
             raise Exception(f"Error in dungeon synth processing: {str(e)}")
+    
+    def _apply_s_curve(self, gray, contrast):
         """Apply S-curve for gentle contrast enhancement"""
         # Normalize to 0-1
         normalized = gray / 255.0
@@ -378,18 +382,19 @@ class DungeonSynthProcessor:
                        np.maximum(15, gray * 0.8))        # Deep but not pure blacks
         return aged
     
-    def _apply_tonal_compression(self, gray, threshold):
-        """Atmospheric tonal compression"""
     def _apply_tonal_compression(self, gray):
         """Atmospheric tonal compression"""
         # Compress dynamic range while preserving detail
         compressed = gray * 0.7 + 40  # Lift shadows, compress highlights
         return np.clip(compressed, 0, 255)
+    
+    def _apply_crystalline_effect(self, gray, threshold):
         """Winter synth crystalline processing"""
         # Sharp, clean transitions with enhanced highlights
-        return np.where(gray > threshold, 
-                       np.minimum(255, gray * 1.3), 
-                       np.maximum(0, gray * 0.5))
+        crystalline = np.where(gray > threshold, 
+                              np.minimum(255, gray * 1.3), 
+                              np.maximum(0, gray * 0.5))
+        return crystalline
     
     def _apply_lithographic_effect(self, gray, threshold):
         """Lithographic/engraving simulation"""
@@ -397,23 +402,24 @@ class DungeonSynthProcessor:
         return np.where(gray > threshold + 20, 255,
                        np.where(gray < threshold - 20, 0, gray))
     
-    def _apply_vintage_film_effect(self, gray, threshold):
-        """Vintage film degradation effect"""
     def _apply_vintage_film_effect(self, gray):
         """Vintage film degradation effect"""
         # Lifted blacks, compressed highlights
         lifted = gray * 0.8 + 30
         return np.clip(lifted, 0, 240)  # Prevent pure whites
-        """Warm comfy synth processing"""
+    
     def _apply_comfy_effect(self, gray):
         """Warm comfy synth processing"""
         # Gentle, low contrast with lifted shadows
         comfy = gray * 0.7 + 50
         return np.clip(comfy, 0, 255)
+    
+    def _apply_forest_effect(self, gray, threshold):
         """Forest/organic texture enhancement"""
         # Enhanced midtones for organic detail
-        return np.where(gray > threshold + 30, 255,
-                       np.where(gray < threshold - 30, 0, gray * 1.1))
+        forest = np.where(gray > threshold + 30, 255,
+                         np.where(gray < threshold - 30, 0, gray * 1.1))
+        return forest
     
     def _apply_method_specific_noise(self, gray, noise_amount, method, params):
         """Apply noise based on method characteristics"""
