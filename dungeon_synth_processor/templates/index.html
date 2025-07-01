@@ -107,6 +107,17 @@
                     <option value="3000">3000x3000 - Ultra HD</option>
                 </select>
             </div>
+
+            <!-- ASPECT RATIO TOGGLE -->
+            <div class="control-group" style="margin: 20px 0; text-align: center;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="preserveAspectRatio" style="width: 18px; height: 18px; cursor: pointer;">
+                    <span style="font-weight: bold; color: #ddd;">Keep Original Shape (Don't Crop to Square)</span>
+                </label>
+                <p style="font-size: 0.85em; color: #999; margin-top: 5px; font-style: italic;">
+                    When checked, images maintain their original proportions instead of being cropped to squares
+                </p>
+            </div>
             
             <div class="action-buttons">
                 <button onclick="processAllPresets()" id="processAllBtn" disabled>Generate All Variations</button>

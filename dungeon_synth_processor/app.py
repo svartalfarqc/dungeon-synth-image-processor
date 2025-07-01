@@ -184,6 +184,7 @@ def process_image():
             blur = float(data.get('blur', 0))
             method = data.get('method', 'custom')
             color_tint = data.get('color_tint', 'none')
+            preserve_aspect_ratio = data.get('preserve_aspect_ratio', False)
             
             # Validate parameter ranges
             contrast = max(0.1, min(5.0, contrast))
@@ -214,7 +215,8 @@ def process_image():
             'noise': int(data.get('noise', 20)),
             'blur': float(data.get('blur', 0)),
             'method': data.get('method', 'custom'),
-            'color_tint': color_tint
+            'color_tint': color_tint,
+            'preserve_aspect_ratio': preserve_aspect_ratio
         }
         
         # Process and return base64 preview
@@ -261,96 +263,53 @@ def download_processed(preset_name, filename):
         data = request.args
         color_tint = data.get('tint', 'none')
         size = int(data.get('size', '400'))
+        preserve_aspect_ratio = data.get('preserve_aspect_ratio', 'false').lower() == 'true'
         
         # Create cache key to find the exact processed version
         cache_key = f"{preset_name}_{color_tint}"
         
-        # For sizes other than 400, we need to reprocess at target resolution
-        if size != 400:
-            logger.info(f"Processing for download: {preset_name} at {size}x{size} with tint {color_tint}")
-            
-            # Get parameters for this preset
-            if preset_name == 'custom':
-                # For custom, we need to get the current slider values from the request
-                params = {
-                    'contrast': float(data.get('contrast', 1.5)),
-                    'brightness': int(data.get('brightness', 0)),
-                    'threshold': int(data.get('threshold', 128)),
-                    'noise': int(data.get('noise', 20)),
-                    'blur': float(data.get('blur', 0)),
-                    'method': 'custom',
-                    'color_tint': color_tint
-                }
-            else:
-                # For presets, use the preset parameters
-                params = PROCESSING_PRESETS[preset_name].copy()
-                params['color_tint'] = color_tint
-            
-            # Process at target size
-            processed_path = processor.process_at_size(filepath, params, size)
-            
-            # Create filename with color tint if applied
-            tint_suffix = f'_{color_tint}' if color_tint != 'none' else ''
-            download_name = f'dungeon_synth_{preset_name}{tint_suffix}_{size}x{size}.png'
-            
-            logger.info(f"Download started: {preset_name} - {filename} with tint {color_tint} ({size}x{size})")
-            
-            return send_file(
-                processed_path,
-                as_attachment=True,
-                download_name=download_name,
-                mimetype='image/png'
-            )
+        # Process the image to get actual dimensions
+        logger.info(f"Processing for download: {preset_name} at size {size} with tint {color_tint}, preserve_aspect_ratio={preserve_aspect_ratio}")
         
-        # For 400x400, use existing cache logic
-        if filename in preview_cache and cache_key in preview_cache[filename]:
-            # Use the cached version - this is the exact preview shown
-            processed_image = preview_cache[filename][cache_key]
+        # Get parameters for this preset
+        if preset_name == 'custom':
+            # For custom, we need to get the current slider values from the request
+            params = {
+                'contrast': float(data.get('contrast', 1.5)),
+                'brightness': int(data.get('brightness', 0)),
+                'threshold': int(data.get('threshold', 128)),
+                'noise': int(data.get('noise', 20)),
+                'blur': float(data.get('blur', 0)),
+                'method': 'custom',
+                'color_tint': color_tint,
+                'preserve_aspect_ratio': preserve_aspect_ratio
+            }
         else:
-            # If not cached, we need to reprocess with the exact same parameters
-            logger.info(f"Reprocessing for download: {preset_name} with tint {color_tint}")
-            
-            # Get parameters for this preset
-            if preset_name == 'custom':
-                # For custom, we need to get the current slider values from the request
-                params = {
-                    'contrast': float(data.get('contrast', 1.5)),
-                    'brightness': int(data.get('brightness', 0)),
-                    'threshold': int(data.get('threshold', 128)),
-                    'noise': int(data.get('noise', 20)),
-                    'blur': float(data.get('blur', 0)),
-                    'method': 'custom',
-                    'color_tint': color_tint
-                }
-            else:
-                # For presets, use the preset parameters
-                params = PROCESSING_PRESETS[preset_name].copy()
-                params['color_tint'] = color_tint
-            
-            # Process to get the exact same result
-            preview_base64 = processor.process_preview(filepath, params)
-            
-            # Convert base64 to PIL Image
-            image_data = base64.b64decode(preview_base64.split(',')[1])
-            processed_image = Image.open(io.BytesIO(image_data))
-            
-            # Cache it for future use
-            if filename not in preview_cache:
-                preview_cache[filename] = {}
-            preview_cache[filename][cache_key] = processed_image.copy()
+            # For presets, use the preset parameters
+            params = PROCESSING_PRESETS[preset_name].copy()
+            params['color_tint'] = color_tint
+            params['preserve_aspect_ratio'] = preserve_aspect_ratio
         
-        # Save to temporary file for download
-        temp_path = os.path.join(processor.temp_dir, f"download_{preset_name}_{color_tint}_{filename}.png")
-        processed_image.save(temp_path, 'PNG', quality=100, optimize=False)
+        # Process at target size
+        processed_path = processor.process_at_size(filepath, params, size)
         
-        # Create filename with color tint if applied
+        # Get actual dimensions of processed image to create accurate filename
+        with Image.open(processed_path) as img:
+            actual_width, actual_height = img.size
+        
+        # Create filename with actual dimensions
         tint_suffix = f'_{color_tint}' if color_tint != 'none' else ''
-        download_name = f'dungeon_synth_{preset_name}{tint_suffix}_400x400.png'
+        if preserve_aspect_ratio and actual_width != actual_height:
+            # Use actual dimensions in filename when aspect ratio is preserved
+            download_name = f'dungeon_synth_{preset_name}{tint_suffix}_{actual_width}x{actual_height}.png'
+        else:
+            # Use square dimensions for cropped images
+            download_name = f'dungeon_synth_{preset_name}{tint_suffix}_{size}x{size}.png'
         
-        logger.info(f"Download started: {preset_name} - {filename} with tint {color_tint} (400x400)")
+        logger.info(f"Download started: {preset_name} - {filename} with tint {color_tint} (actual: {actual_width}x{actual_height})")
         
         return send_file(
-            temp_path,
+            processed_path,
             as_attachment=True,
             download_name=download_name,
             mimetype='image/png'

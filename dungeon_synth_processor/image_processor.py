@@ -80,8 +80,10 @@ class DungeonSynthProcessor:
                 img.close()
                 raise Exception("Invalid or corrupted image file")
             
+            preserve_aspect_ratio = params.get('preserve_aspect_ratio', False)
+            
             # Create preview first - this gives us consistent 400x400 base
-            preview = self._create_square_preview(img, 400)
+            preview = self._create_square_preview(img, 400, preserve_aspect_ratio)
             img.close()
             
             # Apply processing to the 400x400 preview
@@ -194,6 +196,7 @@ class DungeonSynthProcessor:
         try:
             # Try to use cached preview result first for exact consistency
             cache_key = f"{os.path.basename(filepath)}_{hash(str(params))}"
+            preserve_aspect_ratio = params.get('preserve_aspect_ratio', False)
             
             if cache_key in self.processed_cache:
                 # Use the exact processed preview and upscale it intelligently
@@ -205,15 +208,17 @@ class DungeonSynthProcessor:
                 orig_width, orig_height = original_img.size
                 
                 # Determine if we should crop to square or maintain aspect ratio
-                if abs(orig_width - orig_height) < min(orig_width, orig_height) * 0.1:
+                if preserve_aspect_ratio:
+                    # Apply processing to full resolution for better quality
+                    final_processed = self._apply_processing_to_image(original_img, params)
+                elif abs(orig_width - orig_height) < min(orig_width, orig_height) * 0.1:
                     # Nearly square - upscale to fit the larger dimension
                     target_size = max(orig_width, orig_height)
                     final_processed = processed_preview.resize((target_size, target_size), Image.Resampling.LANCZOS)
                 else:
                     # Rectangular - create final image matching original aspect ratio
                     # Apply processing to full resolution for better quality on rectangular images
-                    original_img_processed = self._apply_processing_to_image(original_img, params)
-                    final_processed = original_img_processed
+                    final_processed = self._apply_processing_to_image(original_img, params)
                 
                 original_img.close()
             else:
@@ -243,8 +248,8 @@ class DungeonSynthProcessor:
         except:
             return False
     
-    def _create_square_preview(self, image, size):
-        """Create square preview matching web app crop logic"""
+    def _create_square_preview(self, image, size, preserve_aspect_ratio=False):
+        """Create preview - either square crop or preserve aspect ratio"""
         # Ensure proper color mode before processing
         if image.mode not in ('RGB', 'L'):
             if image.mode == 'RGBA':
@@ -254,13 +259,20 @@ class DungeonSynthProcessor:
             else:
                 image = image.convert('RGB')
         
-        width, height = image.size
-        crop_size = min(width, height)
-        sx = (width - crop_size) // 2
-        sy = (height - crop_size) // 2
-        
-        cropped = image.crop((sx, sy, sx + crop_size, sy + crop_size))
-        return cropped.resize((size, size), Image.Resampling.LANCZOS)
+        if preserve_aspect_ratio:
+            # Preserve aspect ratio - fit within the size box
+            result = image.copy()
+            result.thumbnail((size, size), Image.Resampling.LANCZOS)
+            return result
+        else:
+            # Original square crop behavior
+            width, height = image.size
+            crop_size = min(width, height)
+            sx = (width - crop_size) // 2
+            sy = (height - crop_size) // 2
+            
+            cropped = image.crop((sx, sy, sx + crop_size, sy + crop_size))
+            return cropped.resize((size, size), Image.Resampling.LANCZOS)
     
     def _apply_processing_to_preview(self, preview_image, params):
         """Apply processing specifically tuned for 400x400 preview"""
@@ -275,7 +287,28 @@ class DungeonSynthProcessor:
     
     def _apply_processing_to_image(self, image, params):
         """Apply processing to any size image with scaling adjustments"""
-        return self._apply_dungeon_synth_processing(image, params, is_preview=False)
+        preserve_aspect_ratio = params.get('preserve_aspect_ratio', False)
+        
+        # If preserving aspect ratio, don't crop
+        if preserve_aspect_ratio:
+            processed_img = image
+        else:
+            # Crop to square
+            width, height = image.size
+            size = min(width, height)
+            sx = (width - size) // 2
+            sy = (height - size) // 2
+            processed_img = image.crop((sx, sy, sx + size, sy + size))
+        
+        # Apply processing
+        processed = self._apply_dungeon_synth_processing(processed_img, params, is_preview=False)
+        
+        # Apply color tinting if specified
+        color_tint = params.get('color_tint', 'none')
+        if color_tint and color_tint != 'none':
+            processed = self._apply_color_tint(processed, color_tint)
+        
+        return processed
     
     def _apply_dungeon_synth_processing(self, image, params, is_preview=True):
         """Enhanced dungeon synth processing with research-based methods"""
@@ -287,6 +320,10 @@ class DungeonSynthProcessor:
             
             if img_array is None or img_array.size == 0:
                 raise Exception("Invalid image array")
+            
+            # Verify array shape
+            if len(img_array.shape) != 3 or img_array.shape[2] != 3:
+                raise Exception(f"Invalid image array shape: {img_array.shape}")
             
             # Apply blur first if needed
             blur_amount = params.get('blur', 0)
@@ -360,6 +397,11 @@ class DungeonSynthProcessor:
                 gray = self._apply_method_specific_noise(gray, noise_amount, method, params)
             
             gray = gray.astype(np.uint8)
+            
+            # Ensure the result is 2D before stacking
+            if len(gray.shape) != 2:
+                raise Exception(f"Gray array has invalid shape after processing: {gray.shape}")
+            
             result = np.stack([gray, gray, gray], axis=-1)
             return Image.fromarray(result)
             
@@ -423,6 +465,9 @@ class DungeonSynthProcessor:
     
     def _apply_method_specific_noise(self, gray, noise_amount, method, params):
         """Apply noise based on method characteristics"""
+        if len(gray.shape) != 2:
+            raise ValueError(f"Expected 2D grayscale array, got shape {gray.shape}")
+            
         height, width = gray.shape
         seed_value = int(np.sum(gray) % 1000) + hash(str(params)) % 1000
         np.random.seed(seed_value)
@@ -446,14 +491,23 @@ class DungeonSynthProcessor:
         
         # Generate appropriate noise pattern
         if grain_size > 1:
-            # Create coarser grain
+            # Create coarser grain - handle non-square dimensions properly
+            small_height = max(1, height // grain_size)
+            small_width = max(1, width // grain_size)
             small_noise = np.random.uniform(-noise_scale/2, noise_scale/2, 
-                                          (height//grain_size, width//grain_size))
-            noise_array = np.repeat(np.repeat(small_noise, grain_size, axis=0), grain_size, axis=1)
-            # Crop to exact size
-            noise_array = noise_array[:height, :width]
+                                          (small_height, small_width))
+            
+            # Resize to match original dimensions
+            noise_array = np.zeros((height, width))
+            for i in range(small_height):
+                for j in range(small_width):
+                    y_start = i * grain_size
+                    y_end = min((i + 1) * grain_size, height)
+                    x_start = j * grain_size
+                    x_end = min((j + 1) * grain_size, width)
+                    noise_array[y_start:y_end, x_start:x_end] = small_noise[i, j]
         else:
-            noise_array = np.random.uniform(-noise_scale/2, noise_scale/2, gray.shape)
+            noise_array = np.random.uniform(-noise_scale/2, noise_scale/2, (height, width))
         
         return np.clip(gray + noise_array, 0, 255)
 
@@ -475,17 +529,25 @@ class DungeonSynthProcessor:
                 else:
                     img = img.convert('RGB')
             
-            # Create square crop
+            preserve_aspect_ratio = params.get('preserve_aspect_ratio', False)
+        
+            # Create square crop or preserve ratio based on preference
             width, height = img.size
-            size = min(width, height)
-            sx = (width - size) // 2
-            sy = (height - size) // 2
             
-            # Crop to square
-            cropped = img.crop((sx, sy, sx + size, sy + size))
-            
-            # Resize to target size
-            resized = cropped.resize((target_size, target_size), Image.Resampling.LANCZOS)
+            if preserve_aspect_ratio:
+                # Preserve aspect ratio - scale to fit within target_size
+                # Create a copy to avoid modifying the original
+                img_copy = img.copy()
+                img_copy.thumbnail((target_size, target_size), Image.Resampling.LANCZOS)
+                resized = img_copy
+            else:
+                # Original square crop behavior
+                size = min(width, height)
+                sx = (width - size) // 2
+                sy = (height - size) // 2
+                
+                cropped = img.crop((sx, sy, sx + size, sy + size))
+                resized = cropped.resize((target_size, target_size), Image.Resampling.LANCZOS)
             
             img.close()
             

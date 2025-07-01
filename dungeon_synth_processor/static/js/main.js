@@ -5,6 +5,7 @@ class DungeonSynthApp {
         this.isProcessing = false;
         this.selectedColorTint = 'none';
         this.colorTints = {};
+        this.preserveAspectRatio = false;
         this.processedImages = {}; // Store processed images for each preset
         this.initializeEventListeners();
         this.updateSliderDisplays();
@@ -40,6 +41,21 @@ class DungeonSynthApp {
                 });
             }
         });
+
+        const aspectToggle = document.getElementById('preserveAspectRatio');
+        if (aspectToggle) {
+            aspectToggle.addEventListener('change', (e) => {
+                this.preserveAspectRatio = e.target.checked;
+                // Reprocess if we have an image loaded
+                if (this.currentFilename && !this.isProcessing) {
+                    this.debounceCustomProcess();
+                    // Also reprocess all presets if they've been generated
+                    if (Object.keys(this.processedImages).length > 1) {
+                        this.processAllPresets();
+                    }
+                }
+            });
+        }
 
         // Color swatch selection
         document.querySelectorAll('.color-swatch').forEach(swatch => {
@@ -121,6 +137,7 @@ class DungeonSynthApp {
         if (!params) return;
 
         params.color_tint = this.selectedColorTint;
+        params.preserve_aspect_ratio = this.preserveAspectRatio;  // Add this line
         const preview = await this.processWithParams(params);
         
         const imageMap = {
@@ -339,6 +356,7 @@ class DungeonSynthApp {
         const params = this.getCurrentParams();
         params.method = 'custom';
         params.color_tint = this.selectedColorTint;
+        params.preserve_aspect_ratio = this.preserveAspectRatio;  // Ensure this is included
 
         try {
             const preview = await this.processWithParams(params);
@@ -365,7 +383,8 @@ class DungeonSynthApp {
             brightness: parseInt(document.getElementById('brightness')?.value || 0),
             threshold: parseInt(document.getElementById('threshold')?.value || 128),
             noise: parseInt(document.getElementById('noise')?.value || 20),
-            blur: parseFloat(document.getElementById('blur')?.value || 0)
+            blur: parseFloat(document.getElementById('blur')?.value || 0),
+            preserve_aspect_ratio: this.preserveAspectRatio
         };
     }
 
@@ -417,6 +436,7 @@ class DungeonSynthApp {
             this.showProcessingStatus(true, `Applying ${presetName} preset...`, 30);
             
             params.color_tint = this.selectedColorTint;
+            params.preserve_aspect_ratio = this.preserveAspectRatio;  // Add this line
             const preview = await this.processWithParams(params);
             
             const imageMap = {
@@ -487,6 +507,7 @@ class DungeonSynthApp {
                 this.showProcessingStatus(true, `Processing ${preset.name} (${i + 1}/${presets.length})...`, progress);
                 
                 preset.params.color_tint = this.selectedColorTint;
+                preset.params.preserve_aspect_ratio = this.preserveAspectRatio; 
                 const preview = await this.processWithParams(preset.params);
                 this.displayProcessedImage(preset.imageId, preview);
                 this.processedImages[preset.name] = true;
@@ -564,7 +585,7 @@ class DungeonSynthApp {
             const outputSize = document.getElementById('outputSize')?.value || '400';
             
             // Build URL with current parameters
-            let url = `/download/${presetName}/${this.currentFilename}?tint=${this.selectedColorTint}&size=${outputSize}`;
+            let url = `/download/${presetName}/${this.currentFilename}?tint=${this.selectedColorTint}&size=${outputSize}&preserve_aspect_ratio=${this.preserveAspectRatio}`;
             
             // For custom preset, add all current slider values
             if (presetName === 'custom') {
@@ -591,9 +612,22 @@ class DungeonSynthApp {
             
             const a = document.createElement('a');
             a.href = downloadUrl;
-            const tintSuffix = this.selectedColorTint !== 'none' ? `_${this.selectedColorTint}` : '';
-            const sizeSuffix = outputSize === '400' ? '_400x400' : `_${outputSize}x${outputSize}`;
-            a.download = `dungeon_synth_${presetName}${tintSuffix}${sizeSuffix}.png`;
+            
+            // Extract filename from Content-Disposition header if available, or use default
+            const contentDisposition = response.headers.get('content-disposition');
+            let downloadName = `dungeon_synth_${presetName}.png`;
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    downloadName = filenameMatch[1].replace(/['"]/g, '');
+                }
+            } else {
+                // Use the filename pattern from the server
+                const tintSuffix = this.selectedColorTint !== 'none' ? `_${this.selectedColorTint}` : '';
+                downloadName = `dungeon_synth_${presetName}${tintSuffix}.png`;
+            }
+            
+            a.download = downloadName;
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
