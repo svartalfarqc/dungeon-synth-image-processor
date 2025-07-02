@@ -91,8 +91,6 @@ Apply subtle atmospheric overlays to processed images:
 
 ### Aspect Ratio Options
 
-![Aspect Ratio Toggle](screenshots/aspect-ratio-toggle.png)
-
 **Keep Original Shape (Don't Crop to Square)**
 - When enabled: Preserves the original image proportions during processing
 - When disabled: Crops images to perfect squares (default behavior)
