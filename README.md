@@ -1,14 +1,16 @@
 # 🏰 Dungeon Synth Image Processor
 
-Transform ordinary images into authentic dungeon synth album cover aesthetics. This local web application provides 12 carefully crafted presets, 9 atmospheric color tints, and precise manual controls for creating evocative imagery.
+Transform ordinary images into authentic dungeon synth album cover aesthetics. This local web application provides 12 carefully crafted presets, 9 atmospheric color tints, aspect ratio preservation options, and precise manual controls for creating evocative imagery.
 
 ## Features
 
 - **12 Authentic Presets** - From ancient manuscript textures to crystalline winter processing
 - **9 Atmospheric Color Tints** - Deep earth tones, archaic greys, and ritual bloods
+- **Aspect Ratio Preservation** - Keep original image proportions or crop to square
 - **Real-time Preview** - Witness transformations as parameters shift
+- **Automatic Processing** - All variations generated instantly on upload
 - **Multiple Export Resolutions** - 400x400 to 3000x3000 pixels
-- **Batch Processing** - Generate all variations simultaneously
+- **Smart Regeneration** - Updates all previews when settings change
 - **Complete Privacy** - All processing occurs locally on your machine
 
 ## Installation
@@ -45,7 +47,7 @@ Navigate to: http://localhost:5000
 
 ![Main Interface](screenshots/main-interface.png)
 
-The application is organized into four primary sections:
+The application is organized into five primary sections:
 
 ### Upload Section
 - Supports JPG, PNG, TIFF, BMP, WebP formats
@@ -87,6 +89,22 @@ Apply subtle atmospheric overlays to processed images:
 - **Parchment Age** - Yellowed manuscript tones
 - **Deep Purple** - Mystical, arcane atmosphere
 
+### Aspect Ratio Options
+
+![Aspect Ratio Toggle](screenshots/aspect-ratio-toggle.png)
+
+**Keep Original Shape (Don't Crop to Square)**
+- When enabled: Preserves the original image proportions during processing
+- When disabled: Crops images to perfect squares (default behavior)
+- Preview adapts in real-time to show the effect
+- Download sizes respect the chosen aspect ratio setting
+
+This feature is particularly useful for:
+- Maintaining cinematic widescreen compositions
+- Preserving portrait-oriented artwork
+- Working with banner or header images
+- Creating non-standard album cover formats
+
 ### Manual Controls
 
 | Control | Range | Effect |
@@ -106,32 +124,35 @@ Apply subtle atmospheric overlays to processed images:
 - **2000x2000** - High resolution
 - **3000x3000** - Archival quality
 
+When "Keep Original Shape" is enabled, the download maintains the aspect ratio within the selected size constraints.
+
 ## Usage Workflows
 
 ### Basic Processing
-1. Upload source image
-2. Select desired preset
+1. Upload source image (all variations generated automatically)
+2. Select desired preset to view in detail
 3. Apply color tinting if desired
 4. Download processed result
 
 ### Advanced Processing
-1. Upload source image
-2. Generate all preset variations for comparison
-3. Select preferred aesthetic
+1. Upload source image (all variations generated automatically)
+2. Toggle "Keep Original Shape" if desired
+3. Select preferred aesthetic from generated previews
 4. Fine-tune using manual controls
 5. Apply atmospheric color tinting
 6. Export at desired resolution
 
 ### Batch Generation
-1. Upload source image
-2. Execute "Generate All Variations"
-3. Download individual presets as needed
+All preset variations are automatically generated when you:
+- Upload a new image
+- Change the aspect ratio preference
+- Select a different color tint
 
 ## Technical Implementation
 
 ### Processing Pipeline
 ```
-Input → Square Crop → Blur (optional) → Grayscale Conversion
+Input → Orientation Fix → Aspect Decision → Blur (optional) → Grayscale Conversion
 → Brightness → Contrast → Method Processing → Noise → Color Tint → Output
 ```
 
@@ -145,6 +166,12 @@ Input → Square Crop → Blur (optional) → Grayscale Conversion
 - **Blend Modes**: Overlay, Multiply, Soft Light
 - **Opacity Range**: 20-35% depending on tint
 - **Non-destructive**: Applied after primary processing
+
+### Aspect Ratio Preservation
+- **Square Crop Mode**: Centers and crops to largest square
+- **Preserve Mode**: Maintains original proportions
+- **Preview System**: Shows letterboxed preview for non-square ratios
+- **Export System**: Produces files at actual processed dimensions
 
 ## File Specifications
 
@@ -166,19 +193,73 @@ Input → Square Crop → Blur (optional) → Grayscale Conversion
 
 ### Adding Custom Presets
 
-Modify `presets.py`:
+To add a new preset, modify `presets.py`. Here's a complete working example that creates a "Gothic Cathedral" preset with stained glass window effects:
 
 ```python
-'custom_preset': {
-    'contrast': 1.5,
-    'brightness': 0,
-    'threshold': 128,
-    'noise': 20,
-    'blur': 1.0,
-    'method': 'custom',
-    'name': 'Custom Preset',
-    'description': 'Description of effect'
+# In presets.py, add to PROCESSING_PRESETS dictionary:
+
+'gothicCathedral': {
+    'contrast': 2.5,        # High contrast for dramatic shadows
+    'brightness': -25,      # Darker overall tone
+    'threshold': 95,        # Lower threshold for more blacks
+    'noise': 15,           # Moderate grain for texture
+    'blur': 0.5,           # Slight blur for mystical effect
+    'method': 'gothic',     # Custom processing method
+    'name': 'Gothic Cathedral',
+    'description': 'Deep shadows with stained glass luminosity'
 }
+```
+
+Then implement the processing method in `image_processor.py`:
+
+```python
+# In _apply_dungeon_synth_processing method, add:
+
+elif method == 'gothic':
+    # Gothic cathedral effect - deep shadows with bright highlights
+    gray = np.where(gray > threshold + 50, 
+                   np.minimum(255, gray * 1.4),  # Bright areas glow
+                   np.where(gray < threshold - 30, 
+                           0,                     # Deep blacks
+                           gray * 0.6))           # Midtones compressed
+```
+
+Finally, update the UI in `main.js`:
+
+```javascript
+// Add to the presets object in applyPreset function:
+'gothicCathedral': { 
+    contrast: 2.5, 
+    brightness: -25, 
+    threshold: 95, 
+    noise: 15, 
+    blur: 0.5, 
+    method: 'gothic' 
+}
+
+// Add to the imageMap object:
+'gothicCathedral': 'gothicCathedralImage'
+```
+
+And add the HTML in `index.html`:
+
+```html
+<!-- Add to preset buttons grid -->
+<button onclick="applyPreset('gothicCathedral')">⛪ Gothic Cathedral</button>
+
+<!-- Add to image grid -->
+<div class="image-container">
+    <h3>Gothic Cathedral</h3>
+    <div class="image-wrapper">
+        <img id="gothicCathedralImage" class="preview-image" style="display: none;">
+        <div class="processing-placeholder">
+            <div class="placeholder-icon">⛪</div>
+            <p>Processing preview will appear here</p>
+        </div>
+    </div>
+    <button class="download-btn" onclick="downloadProcessed('gothicCathedral')" disabled>Download</button>
+    <div class="effect-info">Deep shadows with stained glass luminosity</div>
+</div>
 ```
 
 ### Creating Color Tints
@@ -186,11 +267,11 @@ Modify `presets.py`:
 Add to `COLOR_TINTS` in `presets.py`:
 
 ```python
-'custom_tint': {
-    'name': 'Custom Tint',
-    'color': '#hexcode',
-    'opacity': 0.3,
-    'blend_mode': 'overlay'
+'moonlight': {
+    'name': 'Moonlight Silver',
+    'color': '#C0C0C0',  # Silver
+    'opacity': 0.20,
+    'blend_mode': 'soft_light'
 }
 ```
 
@@ -215,6 +296,11 @@ Add to `COLOR_TINTS` in `presets.py`:
 - Consider resizing before upload for optimal performance
 - Processing optimized for images under 5000x5000 pixels
 
+**Aspect Ratio Preview Issues**
+- Non-square images show letterboxed in preview
+- Actual downloads maintain true dimensions
+- Preview always fits within 400x400 container
+
 ### Browser Compatibility
 - Chrome/Edge: Full functionality
 - Firefox: Full functionality
@@ -234,6 +320,12 @@ Add to `COLOR_TINTS` in `presets.py`:
 - Silhouette/Threshold: Perfect for stark, dramatic imagery
 - Forest/Comfy: Best for organic and natural subjects
 
+### Aspect Ratio Considerations
+- **Square Crop**: Traditional album covers, social media posts
+- **Preserve Ratio**: Banners, wallpapers, cinematic compositions
+- **Widescreen Sources**: Enable preservation for panoramic effects
+- **Portrait Sources**: Maintain height for dramatic vertical compositions
+
 ### Color Application
 - Apply tinting after achieving desired monochromatic processing
 - Sepia/Parchment: Historical and aged aesthetics
@@ -244,6 +336,19 @@ Add to `COLOR_TINTS` in `presets.py`:
 - 400x400: Web use and social media
 - 1400x1400: Music streaming platforms
 - 2000x2000+: Physical media and high-quality prints
+- Aspect preserved exports: Digital displays and banners
+
+## Testing
+
+The project includes comprehensive test suites:
+
+```bash
+# Run all tests
+python test_app.py
+
+# Test aspect ratio functionality specifically
+python test_aspect_ratio.py
+```
 
 ## Privacy and Security
 

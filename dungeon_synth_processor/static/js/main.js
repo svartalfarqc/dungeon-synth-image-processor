@@ -339,10 +339,8 @@ class DungeonSynthApp {
     }
 
     enableControls() {
-        const processAllBtn = document.getElementById('processAllBtn');
         const resetBtn = document.getElementById('resetBtn');
         
-        if (processAllBtn) processAllBtn.disabled = false;
         if (resetBtn) resetBtn.disabled = false;
         
         document.querySelectorAll('.download-btn').forEach(btn => {
